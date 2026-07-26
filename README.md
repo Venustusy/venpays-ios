@@ -12,6 +12,16 @@ Native iOS Apple Pay SDK for VenPays.
 - Xcode 16+
 - Physical Apple Pay–capable device for runtime testing
 
+### Xcode destination (important)
+
+This package is **iOS-only**. If you see:
+
+`Unable to resolve module dependency: 'UIKit'`
+
+you are building for **My Mac**. In the Xcode toolbar, switch the destination to an **iPhone / iPad simulator** (or an iOS device), then build again (`⌘B`).
+
+Do not use **My Mac**, Mac Catalyst, or DriverKit destinations for this package.
+
 ## Installation
 
 Add the package in Xcode:
