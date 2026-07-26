@@ -10,7 +10,6 @@ public final class VenPaysApplePayClient {
     private let authorizer: any ApplePayPaymentAuthorizing
     private let recoverer: any PaymentStatusRecovering
     private let logger: Logger
-    private let apiClient: APIClient
 
     /// Creates a client with the given configuration.
     ///
@@ -18,13 +17,16 @@ public final class VenPaysApplePayClient {
     public convenience init(configuration: VenPaysConfiguration) {
         let logger = Logger(enabled: configuration.loggingEnabled)
         let api = APIClient(configuration: configuration, logger: logger)
-        let recovery = PlaceholderPaymentRecoverer()
+        let recovery = PaymentStatusRecoveryService(
+            apiClient: api,
+            policy: configuration.statusRecoveryPolicy,
+            logger: logger
+        )
         self.init(
             configuration: configuration,
             availabilityService: ApplePayAvailabilityService(logger: logger),
             authorizer: api,
             recoverer: recovery,
-            apiClient: api,
             logger: logger
         )
     }
@@ -34,14 +36,12 @@ public final class VenPaysApplePayClient {
         availabilityService: ApplePayAvailabilityService,
         authorizer: any ApplePayPaymentAuthorizing,
         recoverer: any PaymentStatusRecovering,
-        apiClient: APIClient,
         logger: Logger
     ) {
         self.configuration = configuration
         self.availabilityService = availabilityService
         self.authorizer = authorizer
         self.recoverer = recoverer
-        self.apiClient = apiClient
         self.logger = logger
     }
 
@@ -83,21 +83,5 @@ public final class VenPaysApplePayClient {
             logger: logger
         )
         return try await coordinator.present(session: session, from: presenter)
-    }
-}
-
-/// Temporary recoverer replaced when status recovery lands in the next commit.
-struct PlaceholderPaymentRecoverer: PaymentStatusRecovering {
-    func recover(
-        session: VenPaysNativePaymentSession,
-        seed: VenPaysPaymentResult?
-    ) async throws -> VenPaysPaymentResult {
-        if let seed, seed.status.isFinal {
-            return seed
-        }
-        throw VenPaysError(
-            code: .paymentStatusUnknown,
-            message: "Payment status recovery is not configured."
-        )
     }
 }
