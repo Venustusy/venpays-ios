@@ -155,7 +155,17 @@ Note: Host `swift build` without the Xcode developer directory fails (UIKit unav
 
 ## Commit hashes (implementation series)
 
-See `git log` after release commit; series starts at `33f7021` through the 0.1.0 prep commit.
+1. `33f7021` chore(ios-sdk): initialize Swift package structure
+2. `b859a4f` feat(ios-sdk): add native payment session and validation
+3. `a2bfb3b` feat(ios-sdk): add Apple Pay availability and payment request
+4. `d817a94` feat(ios-sdk): implement Apple Pay authorization flow
+5. `97294f8` feat(ios-sdk): integrate VenPays native payment APIs
+6. `410708b` feat(ios-sdk): add payment status recovery
+7. `dbfe739` test(ios-sdk): add SDK unit and networking tests
+8. `9a15ac0` docs(ios-sdk): add integration guides and example app
+9. `bd36021` chore(ios-sdk): prepare 0.1.0 release
+
+## Known limitations
 
 - Not production-validated on device
 - Sandbox E2E pending
