@@ -2,7 +2,9 @@ import Foundation
 import PassKit
 
 /// Encoded Apple Pay token payload ready for VenPays authorize.
-struct EncodedApplePayToken: Sendable, Equatable {
+struct EncodedApplePayToken: @unchecked Sendable, Equatable {
+    /// Decoded `paymentData` JSON object. Marked `@unchecked Sendable` because
+    /// Apple Pay token dictionaries are treated as immutable after encoding.
     let paymentData: [String: Any]
     let paymentMethodDisplayName: String?
     let paymentMethodNetwork: String?

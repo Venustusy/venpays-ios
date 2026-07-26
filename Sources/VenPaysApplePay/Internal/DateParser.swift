@@ -2,13 +2,15 @@ import Foundation
 
 /// Parses ISO-8601 expiry timestamps from backend responses.
 enum DateParser {
-    private static let fractional: ISO8601DateFormatter = {
+    private static let lock = NSLock()
+
+    nonisolated(unsafe) private static let fractional: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
 
-    private static let standard: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let standard: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
@@ -16,6 +18,8 @@ enum DateParser {
 
     static func parseISO8601(_ string: String) throws -> Date {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        lock.lock()
+        defer { lock.unlock() }
         if let date = fractional.date(from: trimmed) ?? standard.date(from: trimmed) {
             return date
         }
@@ -26,6 +30,8 @@ enum DateParser {
     }
 
     static func formatISO8601(_ date: Date) -> String {
-        fractional.string(from: date)
+        lock.lock()
+        defer { lock.unlock() }
+        return fractional.string(from: date)
     }
 }

@@ -53,7 +53,7 @@ struct AuthorizePaymentRequest: Encodable, Sendable {
 }
 
 /// Type-erased Codable wrapper for heterogeneous payment_data JSON.
-struct AnyCodable: Codable, Sendable, Equatable {
+struct AnyCodable: Codable, @unchecked Sendable, Equatable {
     let value: Any
 
     init(_ value: Any) {

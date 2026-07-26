@@ -24,12 +24,43 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
         }
     }
 
-    nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> Stub)?
-    nonisolated(unsafe) static var requests: [URLRequest] = []
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var _requestHandler: ((URLRequest) throws -> Stub)?
+    nonisolated(unsafe) private static var _requests: [URLRequest] = []
+
+    static var requestHandler: ((URLRequest) throws -> Stub)? {
+        get {
+            lock.lock(); defer { lock.unlock() }
+            return _requestHandler
+        }
+        set {
+            lock.lock(); defer { lock.unlock() }
+            _requestHandler = newValue
+        }
+    }
+
+    static var requests: [URLRequest] {
+        get {
+            lock.lock(); defer { lock.unlock() }
+            return _requests
+        }
+        set {
+            lock.lock(); defer { lock.unlock() }
+            _requests = newValue
+        }
+    }
 
     static func reset() {
-        requestHandler = nil
-        requests = []
+        lock.lock()
+        defer { lock.unlock() }
+        _requestHandler = nil
+        _requests = []
+    }
+
+    static func appendRequest(_ request: URLRequest) {
+        lock.lock()
+        defer { lock.unlock() }
+        _requests.append(request)
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -41,7 +72,7 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
     }
 
     override func startLoading() {
-        Self.requests.append(request)
+        Self.appendRequest(request)
 
         guard let handler = Self.requestHandler else {
             client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
@@ -78,6 +109,30 @@ enum MockSessionFactory {
     static func make() -> URLSession {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockURLProtocol.self]
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
         return URLSession(configuration: config)
+    }
+}
+
+extension URLRequest {
+    /// URLProtocol often exposes the body only via `httpBodyStream`.
+    func venpays_httpBodyFromStream() -> Data? {
+        guard let stream = httpBodyStream else { return nil }
+        stream.open()
+        defer { stream.close() }
+        let bufferSize = 1024
+        var data = Data()
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        defer { buffer.deallocate() }
+        while stream.hasBytesAvailable {
+            let read = stream.read(buffer, maxLength: bufferSize)
+            if read > 0 {
+                data.append(buffer, count: read)
+            } else {
+                break
+            }
+        }
+        return data.isEmpty ? nil : data
     }
 }

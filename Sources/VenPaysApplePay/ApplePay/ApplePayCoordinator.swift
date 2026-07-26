@@ -293,13 +293,14 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
                         requestID: error.requestID
                     )
                 }
-            } catch {
+            } catch let recoveryError {
                 callCompletion(completion, status: .success)
                 needsPostSheetRecovery = true
+                let recoveryRequestID = (recoveryError as? VenPaysError)?.requestID ?? error.requestID
                 pendingResult = VenPaysPaymentResult(
                     trackID: session.trackID,
                     status: .unknown,
-                    requestID: error.requestID
+                    requestID: recoveryRequestID
                 )
             }
             return
