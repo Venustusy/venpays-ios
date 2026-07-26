@@ -1,27 +1,27 @@
-// swift-tools-version: 6.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
-    name: "venpays",
+    name: "VenPaysApplePay",
+    platforms: [
+        .iOS(.v15)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "venpays",
-            targets: ["venpays"]
-        ),
+            name: "VenPaysApplePay",
+            targets: ["VenPaysApplePay"]
+        )
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "venpays"
+            name: "VenPaysApplePay",
+            path: "Sources/VenPaysApplePay"
         ),
         .testTarget(
-            name: "venpaysTests",
-            dependencies: ["venpays"]
-        ),
+            name: "VenPaysApplePayTests",
+            dependencies: ["VenPaysApplePay"],
+            path: "Tests/VenPaysApplePayTests"
+        )
     ],
     swiftLanguageModes: [.v6]
 )
