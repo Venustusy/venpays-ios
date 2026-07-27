@@ -1,35 +1,69 @@
 # Release Checklist
 
-## Version
+SDK version target: **0.1.0** (do not mark 1.0.0 without full validation).
 
-Current target: **0.1.0** (not 1.0.0)
+Use `Scripts/prepare-release.sh <version>` for local gates. Do not push tags from the script by default.
 
-Reasons 1.0.0 is blocked:
+## Code
 
-- [ ] Physical-device Apple Pay tests not complete
-- [ ] Sandbox end-to-end tests not complete
-- [ ] Backend native routes may not yet be deployed
-- [ ] Unauthenticated status endpoint still exists on backend side
-- [ ] Backend sheet fields remain hardcoded
-
-## Package gates
-
-- [ ] `swift package resolve`
-- [ ] `swift build` (iOS destination)
-- [ ] `swift test`
-- [ ] `xcodebuild` iOS generic build (if Xcode available)
+- [ ] Clean `git status`
+- [ ] Version updated in `SDKVersion` / changelog consistently
 - [ ] CHANGELOG updated
-- [ ] README version/status accurate
-- [ ] No merchant secret keys in Sources/ or Example/
+- [ ] Public API reviewed
+- [ ] No breaking changes without version bump
+- [ ] No debug-only code paths left enabled by default
+- [ ] No secret material in Sources/, Example/, Tests/, docs samples
+- [ ] `swift package resolve` succeeds (with Xcode toolchain)
 
-## API stability
+## Automated Tests
 
-- [ ] Public API reviewed (`VenPaysApplePayClient`, session, configuration, errors, buttons)
-- [ ] No `PaymentIntent` naming unless backend adds it
-- [ ] No web Apple Pay / merchant validation / `initiativeContext`
+- [ ] `swift build` (Xcode `DEVELOPER_DIR`)
+- [ ] `swift test` where applicable
+- [ ] `xcodebuild -scheme VenPaysApplePay -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build`
+- [ ] Simulator tests via `xcodebuild test`
+- [ ] Test artifacts archived (xcresult under `.build/test-results/` or CI)
+
+## Documentation
+
+- [ ] README current
+- [ ] APIReference current
+- [ ] IntegrationGuide current
+- [ ] BackendIntegration current
+- [ ] ErrorReference current
+- [ ] SecurityModel current
+- [ ] CompatibilityMatrix current
+- [ ] ReleaseValidationReportTemplate ready for testers
+
+## Backend
+
+- [ ] Native routes deployed
+- [ ] Feature flag enabled
+- [ ] Redis TTL configured for native sessions
+- [ ] Merchant Apple Pay ID configured
+- [ ] Processor (MPGS) path validated in the intended environment
+- [ ] Webhook validated
+- [ ] Unauthenticated status route removed or protected
+- [ ] Rate limiting validated
+
+## Device Validation
+
+- [ ] Physical-device matrix complete (see validation report)
+- [ ] Successful transaction complete
+- [ ] Cancellation tested
+- [ ] Failure / decline tested
+- [ ] Recovery tested
+- [ ] Sensitive logs reviewed
+
+## Release
+
+- [ ] Tag signed (`git tag -s v0.1.0-rc.1`)
+- [ ] Release notes approved
+- [ ] GitHub release marked **prerelease** when applicable
+- [ ] Package installation tested from tag
+- [ ] Rollback commit/tag identified
 
 ## Classification
 
-Until physical-device and sandbox E2E validation are done:
+Until physical-device, backend deployment, webhook, and security prerequisites are evidenced:
 
 **IMPLEMENTATION COMPLETE — RELEASE CANDIDATE NOT YET VALIDATED**
