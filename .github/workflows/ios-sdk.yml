@@ -40,18 +40,6 @@ jobs:
           export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
           swift package resolve
 
-      - name: Swift build
-        run: |
-          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-          # Host swift build may fail for UIKit; prefer xcodebuild for iOS.
-          # Still attempt resolve-level compile diagnostics when possible.
-          swift build || echo "swift build returned non-zero on host; continuing with xcodebuild iOS."
-
-      - name: Swift test (host, best-effort)
-        run: |
-          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-          swift test || echo "swift test returned non-zero on host; continuing with simulator xcodebuild test."
-
       - name: List schemes
         run: |
           export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
@@ -66,31 +54,111 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Select iOS Simulator and test
+      - name: Select iOS Simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+
+          # Initialize CoreSimulator service.
+          xcrun simctl list >/dev/null
+
+          echo "==> Available runtimes"
+          xcrun simctl list runtimes
+
+          echo "==> Available devices (JSON summary via Python)"
+          xcrun simctl list devices available --json > /tmp/simctl-devices.json
+
+          python3 <<'PY'
+          import json
+          import os
+          import sys
+
+          preferred = [
+              "iPhone 16",
+              "iPhone 16 Pro",
+              "iPhone 16e",
+              "iPhone 17",
+              "iPhone SE (3rd generation)",
+              "iPad (A16)",
+          ]
+
+          with open("/tmp/simctl-devices.json", encoding="utf-8") as handle:
+              payload = json.load(handle)
+
+          devices_by_runtime = payload.get("devices", {})
+          available = []
+
+          print("==> Available iOS simulators")
+          for runtime, devices in devices_by_runtime.items():
+              # simctl runtime keys look like: com.apple.CoreSimulator.SimRuntime.iOS-18-0
+              if "SimRuntime.iOS" not in runtime:
+                  continue
+              for device in devices:
+                  if not device.get("isAvailable", False):
+                      continue
+                  name = device.get("name", "")
+                  udid = device.get("udid", "")
+                  state = device.get("state", "")
+                  print(f"  runtime={runtime} name={name!r} udid={udid} state={state}")
+                  available.append(
+                      {
+                          "runtime": runtime,
+                          "name": name,
+                          "udid": udid,
+                          "state": state,
+                      }
+                  )
+
+          if not available:
+              print("error: no available iOS simulators found", file=sys.stderr)
+              sys.exit(1)
+
+          selected = None
+          for name in preferred:
+              match = next((item for item in available if item["name"] == name), None)
+              if match is not None:
+                  selected = match
+                  break
+
+          if selected is None:
+              selected = available[0]
+              print(f"==> No preferred device found; falling back to {selected['name']!r}")
+          else:
+              print(f"==> Selected preferred device {selected['name']!r}")
+
+          print(f"SIMULATOR_UDID={selected['udid']}")
+          print(f"SIMULATOR_NAME={selected['name']}")
+          print(f"SIMULATOR_RUNTIME={selected['runtime']}")
+
+          output_path = os.environ["GITHUB_OUTPUT"]
+          with open(output_path, "a", encoding="utf-8") as output:
+              output.write(f"udid={selected['udid']}\n")
+              output.write(f"name={selected['name']}\n")
+              output.write(f"runtime={selected['runtime']}\n")
+          PY
+
+      - name: Boot iOS Simulator
+        run: |
+          set -euo pipefail
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          UDID="${{ steps.simulator.outputs.udid }}"
+          echo "Booting simulator ${UDID} (${{ steps.simulator.outputs.name }})"
+          # boot may exit non-zero if already booted; tolerate that.
+          xcrun simctl boot "${UDID}" || true
+          xcrun simctl bootstatus "${UDID}" -b
+
+      - name: Run tests on iOS Simulator
         run: |
           set -euo pipefail
           export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
           mkdir -p .build/test-results
-
-          # Prefer an available iPhone simulator runtime without hardcoding a marketing name.
-          DEST_LINE=$(xcodebuild -scheme VenPaysApplePay -showdestinations 2>/dev/null \
-            | grep 'platform:iOS Simulator' \
-            | grep 'arch:arm64' \
-            | grep 'id:' \
-            | head -n 1 || true)
-
-          if [[ -z "${DEST_LINE}" ]]; then
-            echo "No iOS Simulator destination found."
-            exit 1
-          fi
-
-          echo "Selected destination line: ${DEST_LINE}"
-          SIM_ID=$(echo "${DEST_LINE}" | sed -n 's/.*id:\([A-F0-9-]*\).*/\1/p')
-          echo "Simulator ID=${SIM_ID}"
+          UDID="${{ steps.simulator.outputs.udid }}"
+          echo "Testing with destination platform=iOS Simulator,id=${UDID}"
 
           xcodebuild \
             -scheme VenPaysApplePay \
-            -destination "platform=iOS Simulator,id=${SIM_ID}" \
+            -destination "platform=iOS Simulator,id=${UDID}" \
             -parallel-testing-enabled NO \
             -resultBundlePath .build/test-results/VenPaysApplePay.xcresult \
             CODE_SIGNING_ALLOWED=NO \
