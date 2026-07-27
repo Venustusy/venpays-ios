@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-27  
 **SDK version:** 0.1.0  
-**Commit (pre-finalization docs commit):** see git log after this file lands  
+**Commit:** `8334b49`  
 **Final classification:**
 
 ## IMPLEMENTATION COMPLETE — RELEASE CANDIDATE NOT YET VALIDATED
