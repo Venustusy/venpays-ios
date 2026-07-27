@@ -102,16 +102,21 @@ Host `swift build` without Xcode DEVELOPER_DIR fails (UIKit). Destination **My M
 
 ## Duplicated or contradictory documentation
 
-- README previously referenced a concrete GitHub URL (`venpays/VenPaysApplePay`) without confirming publication — treat as **placeholder** until remote exists.
+- README previously used generic package naming; canonical private remote is `https://github.com/Venustusy/venpays-ios`.
 - TestingGuide still discusses Apple sandbox tester cards; region may lack Apple Pay sandbox — keep as optional/regional guidance, do not claim it is available everywhere.
 - Some docs historically mentioned sandbox API hosts; production-only environment is now source of truth (`https://merchant.venpays.com`).
 
 ## Stale placeholders
 
-- Example merchant backend: `https://merchant.example.com/api/payments/apple-pay/session`
-- Support email not formally confirmed
-- Organization GitHub path not confirmed
-- CODEOWNERS team name unknown
+- Example merchant backend: `https://merchant.example.com/api/payments/apple-pay/session` (intentionally fake)
+- GitHub team `@Venustusy/ios-sdk-maintainers` must exist under the org for CODEOWNERS enforcement
+- Support / security mailboxes are internal VenPays contacts (`support@venpays.com`, `security@venpays.com`)
+
+## Remote ownership
+
+- Organization: https://github.com/Venustusy
+- Repository: https://github.com/Venustusy/venpays-ios (private)
+- Not open source; no public redistribution
 
 ## Undocumented public APIs
 
@@ -135,5 +140,5 @@ Partial `///` comments existed on many types; several properties, enum cases, an
 5. Unauthenticated `POST /merchant/payment-status-by-track-id` security prerequisite not confirmed resolved
 6. Sensitive log review on device/backend not evidenced
 7. Pilot merchant integration not evidenced
-8. Private Git remote / branch protection / CODEOWNERS enforcement not configured
+8. Private Git remote configured (`Venustusy/venpays-ios`); enable branch protection and ensure GitHub team `ios-sdk-maintainers` exists for CODEOWNERS
 9. No CI green run on a published remote yet

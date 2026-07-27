@@ -9,10 +9,10 @@ Use for GitHub Releases / internal RC notes.
 ## Installation
 
 ```swift
-.package(url: "https://github.com/<organization>/venpays-apple-pay-ios.git", from: "X.Y.Z")
+.package(url: "https://github.com/Venustusy/venpays-ios.git", from: "X.Y.Z")
 ```
 
-Placeholder remote — replace before publishing.
+Private Venustusy repository — org access required.
 
 ## Changes
 

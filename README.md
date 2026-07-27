@@ -2,7 +2,12 @@
 
 Native iOS Apple Pay SDK for VenPays.
 
-**CI status:** ![iOS SDK](https://github.com/<organization>/venpays-apple-pay-ios/actions/workflows/ios-sdk.yml/badge.svg) _(placeholder repository path — replace before publishing)_
+**Repository (private):** [Venustusy/venpays-ios](https://github.com/Venustusy/venpays-ios)  
+**Organization:** [Venustusy](https://github.com/Venustusy)
+
+**CI status:** ![iOS SDK](https://github.com/Venustusy/venpays-ios/actions/workflows/ios-sdk.yml/badge.svg)
+
+> This repository is **private** to the Venustusy organization. It is not open source and must not be redistributed or forked publicly.
 
 ## Overview
 
@@ -63,28 +68,34 @@ Webhook / status recovery
 
 ## Installation
 
+Access requires Venustusy organization membership (or an approved collaborator seat on this private repo).
+
 ### Local package
 
 In Xcode: **File → Add Package Dependencies… → Add Local…** → select this repository root.
 
-### Remote Git package
-
-Placeholder until the private/public remote is published:
+### Remote Git package (private)
 
 ```
-https://github.com/<organization>/venpays-apple-pay-ios
+https://github.com/Venustusy/venpays-ios
+```
+
+SSH (recommended for CI / local clones):
+
+```
+git@github.com:Venustusy/venpays-ios.git
 ```
 
 ```swift
 dependencies: [
     .package(
-        url: "https://github.com/<organization>/venpays-apple-pay-ios.git",
+        url: "https://github.com/Venustusy/venpays-ios.git",
         from: "0.1.0"
     )
 ]
 ```
 
-**Label:** placeholder URL — replace `<organization>` / repo name before merchant distribution.
+Xcode will prompt for GitHub credentials with access to the private Venustusy repository.
 
 ## Basic Usage
 
@@ -166,9 +177,9 @@ Do not treat `0.1.0` as production. A `1.0.0` bump requires completed device, ba
 
 ## Support
 
-Contact: `support@venpays.com` _(placeholder — confirm before external distribution)_
+Internal contact: `support@venpays.com` (Venustusy / VenPays)
 
-Security reports: see [CONTRIBUTING.md](CONTRIBUTING.md) / issue security config (do not file secrets in public issues).
+Security reports: `security@venpays.com` — see [CONTRIBUTING.md](CONTRIBUTING.md). Do not file secrets in issues.
 
 ## License
 

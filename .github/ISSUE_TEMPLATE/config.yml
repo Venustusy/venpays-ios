@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Security report
     url: mailto:security@venpays.com
-    about: Do not file security issues publicly. Email security@venpays.com (placeholder — confirm).
+    about: Do not file security issues in tickets with secrets. Email security@venpays.com (Venustusy / VenPays internal).
   - name: Product support
     url: mailto:support@venpays.com
-    about: Merchant support contact (placeholder — confirm).
+    about: Internal Venustusy / VenPays support for this private SDK repository.

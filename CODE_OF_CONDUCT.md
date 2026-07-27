@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We pledge to make participation in our community a harassment-free experience for everyone.
+We pledge to make participation in the Venustusy VenPays iOS SDK workspace a harassment-free experience for everyone authorized to access this private repository.
 
 ## Our Standards
 
@@ -17,18 +17,21 @@ Unacceptable behavior includes:
 - Harassment, trolling, or discriminatory insults
 - Publishing others’ private information without permission
 - Sharing secrets, payment tokens, or credentials in issues/PRs
+- Distributing this private repository or its contents outside Venustusy authorization
 
 ## Enforcement Responsibilities
 
-Project maintainers are responsible for clarifying and enforcing standards and may remove contributions that violate this Code of Conduct.
+Project maintainers (`@Venustusy/ios-sdk-maintainers`) are responsible for clarifying and enforcing standards and may remove contributions that violate this Code of Conduct.
 
 ## Scope
 
-This Code applies within project spaces and when representing the project.
+This Code applies within this private project space and when representing Venustusy / VenPays in related work.
 
 ## Enforcement
 
-Report concerns to `support@venpays.com` (placeholder — confirm) or the private security channel for sensitive matters.
+Report concerns to `support@venpays.com` or the private security channel (`security@venpays.com`) for sensitive matters.
+
+Repository: https://github.com/Venustusy/venpays-ios
 
 ## Attribution
 

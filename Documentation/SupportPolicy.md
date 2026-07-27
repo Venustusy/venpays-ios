@@ -41,11 +41,16 @@ Unsupported: forked SDKs, modified PassKit flows, embedding `X-API-KEY` in apps.
 
 ## Security reporting
 
-Do not file secrets in public issues.
+Do not file secrets in GitHub issues.
 
-Email placeholder: `security@venpays.com` _(confirm before external use)_  
+Email: `security@venpays.com` (Venustusy / VenPays internal)  
 Also see `.github/ISSUE_TEMPLATE/security_config.yml`.
 
 ## Product support contact
 
-`support@venpays.com` _(placeholder — confirm)_
+`support@venpays.com` (Venustusy / VenPays internal)
+
+## Repository
+
+Private: https://github.com/Venustusy/venpays-ios  
+Organization: https://github.com/Venustusy

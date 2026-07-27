@@ -199,7 +199,8 @@ See `Documentation/TestingGuide.md` sandbox checklist. Apple Pay sandbox may be 
 - `Documentation/APIReference.md`, `SecurityModel.md`, operational policies
 - `Documentation/REPOSITORY_AUDIT.md`, `RELEASE_READINESS.md`
 - GitHub Actions `.github/workflows/ios-sdk.yml` + `Documentation/CI.md`
-- Governance: PR/issue templates, CODEOWNERS placeholder, CONTRIBUTING, CODE_OF_CONDUCT, release.yml
+- Governance: PR/issue templates, CODEOWNERS (`@Venustusy/ios-sdk-maintainers`), CONTRIBUTING, CODE_OF_CONDUCT, release.yml
+- Private org remote documented: `https://github.com/Venustusy/venpays-ios`
 - `Scripts/prepare-release.sh`
 - DocC catalog under `Sources/VenPaysApplePay/VenPaysApplePay.docc/`
 
@@ -237,4 +238,4 @@ xcodebuild -scheme VenPaysApplePay -destination 'platform=iOS Simulator,id=DA263
 - Unauthenticated status endpoint remediation confirmation
 - Sensitive log review on device/server
 - Pilot merchant integration
-- Published remote CI green + branch protection / CODEOWNERS replacement
+- Published remote: `https://github.com/Venustusy/venpays-ios` (private). Confirm CI green, branch protection, and GitHub team `@Venustusy/ios-sdk-maintainers` for CODEOWNERS.

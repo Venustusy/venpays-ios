@@ -8,7 +8,10 @@ body:
       value: |
         ## Do not file security issues with secrets here
 
-        Report vulnerabilities privately to **security@venpays.com** (placeholder — confirm before external use).
+        This repository is **private** to [Venustusy](https://github.com/Venustusy)
+        (`https://github.com/Venustusy/venpays-ios`).
+
+        Report vulnerabilities privately to **security@venpays.com**.
 
         Include:
         - SDK version / commit

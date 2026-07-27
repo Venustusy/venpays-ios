@@ -12,7 +12,7 @@
 | package build | PASS | `xcodebuild … generic/platform=iOS CODE_SIGNING_ALLOWED=NO build` → BUILD SUCCEEDED | No |
 | unit tests | PASS | 44 tests / 9 suites on iOS Simulator | No |
 | simulator tests | PASS | Dynamic simulator `iPad (A16)` id `DA2631C0-4058-4EB0-BB57-FA76B0344A33` OS 26.5 | No |
-| CI | PARTIAL | Workflow added; not yet evidenced green on a published remote | Yes (for remote distribution process) |
+| CI | PARTIAL | Workflow present on `Venustusy/venpays-ios`; confirm green runs + branch protection | Yes (process) |
 | API documentation | PASS | Public `///` comments + APIReference + DocC | No |
 | integration documentation | PASS | IntegrationGuide / BackendIntegration / README | No |
 | security model | PASS | SecurityModel.md documented; remediation of gateway prerequisite **not** evidenced | Yes (backend prerequisite) |

@@ -83,8 +83,8 @@ xcodebuild -scheme VenPaysApplePay \
 
 ## Badge
 
-README uses a placeholder badge path:
+CI badge for this private repository:
 
-`https://github.com/<organization>/venpays-apple-pay-ios/actions/workflows/ios-sdk.yml/badge.svg`
+`https://github.com/Venustusy/venpays-ios/actions/workflows/ios-sdk.yml/badge.svg`
 
-Replace `<organization>/venpays-apple-pay-ios` when the remote exists.
+Organization: [Venustusy](https://github.com/Venustusy)

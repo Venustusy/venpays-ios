@@ -1,7 +1,17 @@
-# Placeholder CODEOWNERS — replace before enforcement.
-# Required GitHub team slug example:
-* @<organization>/ios-sdk-maintainers
+# CODEOWNERS — Venustusy private repository
+# Repository: https://github.com/Venustusy/venpays-ios
+# Organization: https://github.com/Venustusy
+#
+# This repository is private to the Venustusy organization.
+# Outside contributors are not accepted.
+#
+# Create the GitHub team `ios-sdk-maintainers` under Venustusy (Settings → Teams)
+# and grant it write/maintain access so CODEOWNERS review requests work.
 
-# Documentation and release governance (optional finer-grained owners once teams exist):
-# /Documentation/ @<organization>/ios-sdk-maintainers
-# /.github/ @<organization>/ios-sdk-maintainers
+* @Venustusy/ios-sdk-maintainers
+
+/Documentation/ @Venustusy/ios-sdk-maintainers
+/.github/ @Venustusy/ios-sdk-maintainers
+/Scripts/ @Venustusy/ios-sdk-maintainers
+/Sources/ @Venustusy/ios-sdk-maintainers
+/Tests/ @Venustusy/ios-sdk-maintainers
