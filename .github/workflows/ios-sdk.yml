@@ -1,0 +1,106 @@
+name: iOS SDK
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+
+concurrency:
+  group: ios-sdk-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: |
+          echo "Available Xcode apps:"
+          ls /Applications | grep -i xcode || true
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+          swift --version
+
+      - name: Resolve package
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          swift package resolve
+
+      - name: Swift build
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          # Host swift build may fail for UIKit; prefer xcodebuild for iOS.
+          # Still attempt resolve-level compile diagnostics when possible.
+          swift build || echo "swift build returned non-zero on host; continuing with xcodebuild iOS."
+
+      - name: Swift test (host, best-effort)
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          swift test || echo "swift test returned non-zero on host; continuing with simulator xcodebuild test."
+
+      - name: List schemes
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          xcodebuild -list
+
+      - name: Generic iOS build
+        run: |
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          xcodebuild \
+            -scheme VenPaysApplePay \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Select iOS Simulator and test
+        run: |
+          set -euo pipefail
+          export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+          mkdir -p .build/test-results
+
+          # Prefer an available iPhone simulator runtime without hardcoding a marketing name.
+          DEST_LINE=$(xcodebuild -scheme VenPaysApplePay -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' \
+            | grep 'arch:arm64' \
+            | grep 'id:' \
+            | head -n 1 || true)
+
+          if [[ -z "${DEST_LINE}" ]]; then
+            echo "No iOS Simulator destination found."
+            exit 1
+          fi
+
+          echo "Selected destination line: ${DEST_LINE}"
+          SIM_ID=$(echo "${DEST_LINE}" | sed -n 's/.*id:\([A-F0-9-]*\).*/\1/p')
+          echo "Simulator ID=${SIM_ID}"
+
+          xcodebuild \
+            -scheme VenPaysApplePay \
+            -destination "platform=iOS Simulator,id=${SIM_ID}" \
+            -parallel-testing-enabled NO \
+            -resultBundlePath .build/test-results/VenPaysApplePay.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            test | tee .build/test-results/xcodebuild-test.log
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: venpays-applepay-test-artifacts
+          path: |
+            .build/test-results/**
+          if-no-files-found: warn
