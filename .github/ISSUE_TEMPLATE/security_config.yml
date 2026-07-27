@@ -1,20 +1,25 @@
-blank_issues_enabled: false
-contact_links: []
-name: Security configuration
-description: Security reporting is private
+name: Security advisory (do not use for secrets)
+description: Redirects reporters to private security email
 title: "[security] "
 labels: ["security"]
 body:
   - type: markdown
     attributes:
       value: |
-        ## Do not file security issues here
+        ## Do not file security issues with secrets here
 
         Report vulnerabilities privately to **security@venpays.com** (placeholder — confirm before external use).
 
         Include:
         - SDK version / commit
         - Impact assessment
-        - Reproduction without embedding production secrets
+        - Reproduction **without** embedding production secrets
 
         Never paste merchant `X-API-KEY`, native session tokens, or Apple Pay payment payloads into GitHub.
+  - type: textarea
+    id: non_sensitive_summary
+    attributes:
+      label: Non-sensitive summary
+      description: High-level description only. No credentials or payment tokens.
+    validations:
+      required: true
