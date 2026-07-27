@@ -1,6 +1,9 @@
 import Foundation
 
 /// Result of checking whether Apple Pay can be used for a session.
+///
+/// ``available`` requires both `PKPaymentAuthorizationController.canMakePayments()` and
+/// `canMakePayments(usingNetworks:capabilities:)` to succeed. Those checks are not equivalent.
 public enum VenPaysApplePayAvailability: Sendable, Equatable {
     /// Device supports Apple Pay and has a card configured for the session networks/capabilities.
     case available

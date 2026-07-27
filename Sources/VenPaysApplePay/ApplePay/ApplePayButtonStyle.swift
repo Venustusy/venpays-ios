@@ -1,11 +1,15 @@
 import Foundation
 import PassKit
 
-/// Apple Pay button visual style.
+/// Apple Pay button visual style mapped to `PKPaymentButtonStyle`.
 public enum ApplePayButtonStyle: Sendable, Equatable {
+    /// System automatic style.
     case automatic
+    /// Black style.
     case black
+    /// White style.
     case white
+    /// White outline style.
     case whiteOutline
 
     var pkStyle: PKPaymentButtonStyle {
@@ -25,7 +29,9 @@ public enum ApplePayButtonStyle: Sendable, Equatable {
     }
 }
 
-/// Apple Pay button type (must use PKPaymentButton — never a fake custom button).
+/// Apple Pay button type mapped to `PKPaymentButtonType`.
+///
+/// Always rendered via `PKPaymentButton` — never a custom facsimile.
 public enum ApplePayButtonType: Sendable, Equatable {
     case plain
     case buy
@@ -33,6 +39,7 @@ public enum ApplePayButtonType: Sendable, Equatable {
     case donate
     case `continue`
     case order
+    /// Closest PassKit mapping is `.checkout` (PassKit has no dedicated `.pay` type).
     case pay
     case subscribe
 
@@ -57,7 +64,6 @@ public enum ApplePayButtonType: Sendable, Equatable {
             }
             return .buy
         case .pay:
-            // PassKit has no dedicated `.pay` type; `.checkout` is the closest official button.
             return .checkout
         case .subscribe:
             if #available(iOS 14.0, *) {

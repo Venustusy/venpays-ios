@@ -2,8 +2,16 @@ import Foundation
 import UIKit
 
 /// Primary entry point for VenPays native Apple Pay on iOS.
+///
+/// Create one client per configuration, obtain a ``VenPaysNativePaymentSession`` from your
+/// merchant backend, check availability, then present Apple Pay only after a direct user tap.
+///
+/// - Important: This type is main-actor isolated. Call it from UI code.
+/// - Warning: The iOS Simulator cannot fully validate Apple Pay authorization. Use a physical device.
+/// - Note: Merchants never supply an `X-API-KEY` to this client.
 @MainActor
 public final class VenPaysApplePayClient {
+    /// Active SDK configuration (environment, timeouts, recovery, logging).
     public let configuration: VenPaysConfiguration
 
     private let availabilityService: ApplePayAvailabilityService
@@ -13,7 +21,10 @@ public final class VenPaysApplePayClient {
 
     /// Creates a client with the given configuration.
     ///
-    /// Networking dependencies are supplied by the SDK. Merchants never pass secret API keys.
+    /// Networking and status-recovery dependencies are constructed internally.
+    ///
+    /// - Parameter configuration: Validated ``VenPaysConfiguration``.
+    /// - Important: Do not pass merchant secret API keys. Initiation is server-to-server only.
     public convenience init(configuration: VenPaysConfiguration) {
         let logger = Logger(enabled: configuration.loggingEnabled)
         let api = APIClient(configuration: configuration, logger: logger)
@@ -45,7 +56,13 @@ public final class VenPaysApplePayClient {
         self.logger = logger
     }
 
-    /// Checks Apple Pay availability for the given trusted session.
+    /// Checks whether Apple Pay can be used for the given trusted session.
+    ///
+    /// Distinguishes unsupported devices from devices that support Apple Pay but lack a
+    /// configured card for the session networks and capabilities.
+    ///
+    /// - Parameter session: Trusted native payment session from your merchant backend.
+    /// - Returns: A ``VenPaysApplePayAvailability`` value.
     public func applePayAvailability(
         for session: VenPaysNativePaymentSession
     ) -> VenPaysApplePayAvailability {
@@ -54,9 +71,17 @@ public final class VenPaysApplePayClient {
 
     /// Presents the Apple Pay sheet and authorizes the payment with VenPays.
     ///
-    /// Must be called as a direct result of a user action (e.g. Apple Pay button tap).
-    /// The `presenter` is retained for API consistency; presentation uses
-    /// `PKPaymentAuthorizationController`.
+    /// On success or accepted processing, returns a ``VenPaysPaymentResult``. User cancellation
+    /// throws ``VenPaysError`` with ``VenPaysErrorCode/paymentCancelled``.
+    ///
+    /// - Parameters:
+    ///   - session: Trusted session. Amount and currency are taken only from this value.
+    ///   - presenter: Presenting view controller retained for API consistency; presentation uses
+    ///     `PKPaymentAuthorizationController`.
+    /// - Returns: Final or best-effort payment result, including `.unknown` when recovery exhausts.
+    /// - Throws: ``VenPaysError`` for availability, presentation, token, network, or backend failures.
+    /// - Important: Invoke only as a direct result of a user action (for example an Apple Pay button tap).
+    /// - Note: Authorize uses a single idempotency key per logical attempt; transport retries reuse it.
     public func presentApplePay(
         session: VenPaysNativePaymentSession,
         from presenter: UIViewController

@@ -1,14 +1,25 @@
 import Foundation
 
 /// Apple Pay configuration embedded in a native payment session from VenPays.
+///
+/// Values are supplied by VenPays initiation and mapped to PassKit when building the payment request.
 public struct VenPaysApplePayConfiguration: Sendable, Codable, Equatable {
+    /// Apple Merchant Identifier (for example `merchant.com.example`).
     public let merchantIdentifier: String
+    /// Display name used as the single final Apple Pay summary item label.
     public let merchantDisplayName: String
+    /// Two-letter uppercase country code (for example `BH`).
     public let countryCode: String
+    /// Three-letter uppercase currency code (for example `BHD`).
     public let currencyCode: String
+    /// Backend network identifiers such as `visa`, `masterCard`.
     public let supportedNetworks: [String]
+    /// Backend capability identifiers such as `threeDSecure`.
     public let merchantCapabilities: [String]
 
+    /// Creates and validates an Apple Pay configuration.
+    ///
+    /// - Throws: ``VenPaysError`` when identifiers, codes, networks, or capabilities are invalid.
     public init(
         merchantIdentifier: String,
         merchantDisplayName: String,

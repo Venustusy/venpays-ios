@@ -1,8 +1,11 @@
 import Foundation
 
 /// Client configuration for VenPays Apple Pay.
+///
+/// Construct once and pass to ``VenPaysApplePayClient``. Invalid timeouts or non-HTTPS custom
+/// base URLs (except localhost) throw ``VenPaysError`` with ``VenPaysErrorCode/invalidConfiguration``.
 public struct VenPaysConfiguration: Sendable, Equatable {
-    /// API environment (production, or custom URL).
+    /// API environment (production or custom URL).
     public var environment: VenPaysEnvironment
 
     /// URLSession request timeout in seconds. Must be greater than zero.
@@ -12,16 +15,19 @@ public struct VenPaysConfiguration: Sendable, Equatable {
     public var statusRecoveryPolicy: PaymentRecoveryPolicy
 
     /// Enables internal diagnostic logging. Disabled by default.
-    /// Never logs tokens, payment data, signatures, or Authorization headers.
+    ///
+    /// - Warning: Even when enabled, the SDK must not log tokens, payment data, signatures,
+    ///   or Authorization headers.
     public var loggingEnabled: Bool
 
     /// Creates a configuration.
     ///
     /// - Parameters:
-    ///   - environment: API environment. Defaults to `.production`.
+    ///   - environment: API environment. Defaults to ``VenPaysEnvironment/production``.
     ///   - requestTimeout: Request timeout in seconds. Defaults to `30`.
-    ///   - statusRecoveryPolicy: Recovery backoff policy. Defaults to `PaymentRecoveryPolicy()`.
+    ///   - statusRecoveryPolicy: Recovery backoff policy. Defaults to ``PaymentRecoveryPolicy``.
     ///   - loggingEnabled: Whether diagnostic logging is enabled. Defaults to `false`.
+    /// - Throws: ``VenPaysError`` when validation fails.
     public init(
         environment: VenPaysEnvironment = .production,
         requestTimeout: TimeInterval = 30,
@@ -36,6 +42,11 @@ public struct VenPaysConfiguration: Sendable, Equatable {
     }
 
     /// Validates environment and timeout constraints.
+    ///
+    /// - Parameters:
+    ///   - environment: Environment whose base URL is checked.
+    ///   - requestTimeout: Timeout that must be greater than zero.
+    /// - Throws: ``VenPaysError`` with ``VenPaysErrorCode/invalidConfiguration``.
     public static func validate(
         environment: VenPaysEnvironment,
         requestTimeout: TimeInterval

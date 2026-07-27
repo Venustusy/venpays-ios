@@ -1,6 +1,11 @@
 import Foundation
 
 /// Controls exponential backoff when recovering payment status after uncertain authorization.
+///
+/// Recovery is used after HTTP 202 / processing responses and after transport uncertainty when
+/// the authorize request may have reached VenPays.
+///
+/// - Note: Set ``jitterFraction`` to `0` in unit tests for deterministic delays.
 public struct PaymentRecoveryPolicy: Sendable, Equatable {
     /// Delay before the first recovery attempt.
     public var initialDelay: TimeInterval
@@ -15,6 +20,9 @@ public struct PaymentRecoveryPolicy: Sendable, Equatable {
     /// Optional bounded jitter fraction in `[0, 1)`. Inject `0` in unit tests.
     public var jitterFraction: Double
 
+    /// Creates a recovery policy.
+    ///
+    /// Defaults: 0.5s initial, 4s maximum delay, multiplier 2, 5 attempts, 15s overall, no jitter.
     public init(
         initialDelay: TimeInterval = 0.5,
         maximumDelay: TimeInterval = 4,

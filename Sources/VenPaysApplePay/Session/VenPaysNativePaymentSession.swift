@@ -2,17 +2,40 @@ import Foundation
 
 /// Trusted native Apple Pay payment session returned by the merchant backend after initiation.
 ///
-/// The `nativeSessionToken` is never included in `description`, `debugDescription`, or logs.
+/// Amount and currency on this type are the sole source of truth for the Apple Pay sheet total.
+/// The SDK does not accept overrides at presentation time.
+///
+/// - Important: `nativeSessionToken` is sensitive. It is redacted from `description` and
+///   `debugDescription` and must never be logged.
+/// - Note: Native session tokens typically expire after approximately 900 seconds on the backend.
 public struct VenPaysNativePaymentSession: Sendable, Codable, Equatable {
+    /// VenPays payment track identifier.
     public let trackID: String
+    /// Opaque Bearer token for authorize and status APIs. Never log this value.
     public let nativeSessionToken: String
+    /// Instant when the native session token expires.
     public let expiresAt: Date
+    /// Trusted payment amount from VenPays initiation.
     public let amount: Decimal
+    /// Trusted ISO-style currency code (three uppercase letters).
     public let currency: String
+    /// Optional merchant reference from initiation.
     public let merchantReference: String?
+    /// Apple Pay PassKit configuration embedded in the initiation response.
     public let applePay: VenPaysApplePayConfiguration
 
     /// Creates and validates a session from merchant-provided initiation fields.
+    ///
+    /// - Parameters:
+    ///   - trackID: Non-empty track identifier.
+    ///   - nativeSessionToken: Non-empty native session token.
+    ///   - expiresAt: Expiry that must be strictly in the future relative to `now`.
+    ///   - amount: Amount greater than zero.
+    ///   - currency: Three-character uppercase currency code.
+    ///   - merchantReference: Optional merchant reference.
+    ///   - applePay: Embedded Apple Pay configuration.
+    ///   - now: Clock used for expiry validation (injectable for tests).
+    /// - Throws: ``VenPaysError`` when validation fails.
     public init(
         trackID: String,
         nativeSessionToken: String,
@@ -83,6 +106,9 @@ public struct VenPaysNativePaymentSession: Sendable, Codable, Equatable {
     }
 
     /// Whether the native session token is still within its validity window.
+    ///
+    /// - Parameter now: Comparison time. Defaults to `Date()`.
+    /// - Returns: `true` when `expiresAt` is less than or equal to `now`.
     public func isExpired(now: Date = Date()) -> Bool {
         expiresAt <= now
     }
@@ -118,10 +144,12 @@ public struct VenPaysNativePaymentSession: Sendable, Codable, Equatable {
 }
 
 extension VenPaysNativePaymentSession: CustomStringConvertible, CustomDebugStringConvertible {
+    /// Redacted description that never includes the native session token.
     public var description: String {
         redactedDescription
     }
 
+    /// Redacted debug description that never includes the native session token.
     public var debugDescription: String {
         redactedDescription
     }
