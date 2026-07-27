@@ -4,14 +4,15 @@ import Testing
 
 @Suite("Configuration")
 struct ConfigurationTests {
-    @Test func sandboxURL() throws {
-        let config = try VenPaysConfiguration(environment: .sandbox)
-        #expect(config.environment.baseURL.absoluteString == "https://api.sandbox.venpays.com")
-    }
-
     @Test func productionURL() throws {
         let config = try VenPaysConfiguration(environment: .production)
-        #expect(config.environment.baseURL.absoluteString == "https://api.venpays.com")
+        #expect(config.environment.baseURL.absoluteString == "https://merchant.venpays.com")
+    }
+
+    @Test func defaultEnvironmentIsProduction() throws {
+        let config = try VenPaysConfiguration()
+        #expect(config.environment == .production)
+        #expect(config.environment.baseURL == VenPaysEnvironment.defaultProductionURL)
     }
 
     @Test func customHTTPSURL() throws {

@@ -24,7 +24,8 @@ Initial Swift Package implementation of the VenPays native iOS Apple Pay SDK.
 
 - Physical-device Apple Pay testing is **pending**
 - Sandbox end-to-end testing is **pending**
-- Default sandbox/production base URLs may still be finalized — use `.custom(URL)` as needed
+- Default production base URL is `https://merchant.venpays.com` (no separate sandbox environment; Apple Pay sandbox is unavailable in some regions)
+- Use `.custom(URL)` only for tests or temporary overrides
 - This release is **not** marked 1.0.0 and is **not** claimed production-ready
 
 **Classification:** IMPLEMENTATION COMPLETE — RELEASE CANDIDATE NOT YET VALIDATED

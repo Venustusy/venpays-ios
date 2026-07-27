@@ -47,7 +47,7 @@ import VenPaysApplePay
 
 let client = VenPaysApplePayClient(
     configuration: VenPaysConfiguration(
-        environment: .sandbox
+        environment: .production
     )
 )
 

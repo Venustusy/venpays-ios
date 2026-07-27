@@ -85,9 +85,8 @@ The backend session amount and currency are authoritative. The SDK builds exactl
 
 ## Environments
 
-Default SDK base URLs (may still be finalized):
+Default SDK base URL:
 
-- sandbox: `https://api.sandbox.venpays.com`
-- production: `https://api.venpays.com`
+- production: `https://merchant.venpays.com`
 
-Use `VenPaysEnvironment.custom(URL)` while hosts are being confirmed.
+Apple Pay sandbox is not used in this SDK (unavailable in some regions). Use `.production`, or `.custom(URL)` only for tests/overrides.

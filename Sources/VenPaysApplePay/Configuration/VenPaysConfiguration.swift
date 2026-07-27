@@ -2,7 +2,7 @@ import Foundation
 
 /// Client configuration for VenPays Apple Pay.
 public struct VenPaysConfiguration: Sendable, Equatable {
-    /// API environment (sandbox, production, or custom URL).
+    /// API environment (production, or custom URL).
     public var environment: VenPaysEnvironment
 
     /// URLSession request timeout in seconds. Must be greater than zero.
@@ -18,12 +18,12 @@ public struct VenPaysConfiguration: Sendable, Equatable {
     /// Creates a configuration.
     ///
     /// - Parameters:
-    ///   - environment: API environment. Defaults to `.sandbox`.
+    ///   - environment: API environment. Defaults to `.production`.
     ///   - requestTimeout: Request timeout in seconds. Defaults to `30`.
     ///   - statusRecoveryPolicy: Recovery backoff policy. Defaults to `PaymentRecoveryPolicy()`.
     ///   - loggingEnabled: Whether diagnostic logging is enabled. Defaults to `false`.
     public init(
-        environment: VenPaysEnvironment = .sandbox,
+        environment: VenPaysEnvironment = .production,
         requestTimeout: TimeInterval = 30,
         statusRecoveryPolicy: PaymentRecoveryPolicy = PaymentRecoveryPolicy(),
         loggingEnabled: Bool = false

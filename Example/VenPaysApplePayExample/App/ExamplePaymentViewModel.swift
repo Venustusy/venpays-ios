@@ -16,9 +16,8 @@ final class ExamplePaymentViewModel: ObservableObject {
     private let client: VenPaysApplePayClient
 
     init() {
-        // Use .custom while sandbox/production hosts are finalized.
         let configuration = try! VenPaysConfiguration(
-            environment: .sandbox,
+            environment: .production,
             loggingEnabled: true
         )
         self.client = VenPaysApplePayClient(configuration: configuration)

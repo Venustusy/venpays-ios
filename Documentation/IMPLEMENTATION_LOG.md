@@ -102,7 +102,7 @@ Physical-device and sandbox end-to-end testing were **not** performed in this im
 - `payment_data` is decoded JSON from `PKPayment.token.paymentData`
 - HTTP 200 completed / 202 processing
 - Session token ~900s; no `paymentSummaryItems` from backend
-- Default hosts `api.sandbox.venpays.com` / `api.venpays.com` may still be finalized
+- Production host: `https://merchant.venpays.com` (sandbox environment removed; Apple Pay sandbox unavailable in some regions)
 
 ## Security boundaries
 

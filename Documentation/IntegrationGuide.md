@@ -30,8 +30,8 @@ import VenPaysApplePay
 ```swift
 let client = VenPaysApplePayClient(
     configuration: try VenPaysConfiguration(
-        environment: .sandbox
-        // or .custom(URL(string: "https://your-venpays-host")!)
+        environment: .production
+        // or .custom(URL(string: "https://your-venpays-host")!) for overrides/tests
     )
 )
 ```
