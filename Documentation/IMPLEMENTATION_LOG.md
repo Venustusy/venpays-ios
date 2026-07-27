@@ -175,10 +175,11 @@ Note: Host `swift build` without the Xcode developer directory fails (UIKit unav
 
 ## Deployment prerequisites
 
-1. Deploy native Apple Pay SDK API routes from `feat/native-apple-pay-sdk-api`
-2. Confirm sandbox/production base URLs
+1. Deploy native Apple Pay SDK API routes (historically developed on `feat/native-apple-pay-sdk-api`)
+2. Confirm production API host `https://merchant.venpays.com` (sandbox environment case removed from SDK)
 3. Configure merchant Apple Pay Merchant ID + processing certificate with processor
 4. Merchant backend implements initiation and returns native session to apps
+5. Authenticate or remove `POST /merchant/payment-status-by-track-id` before public release
 
 ## Physical test items still pending
 
@@ -186,4 +187,54 @@ See `Documentation/TestingGuide.md` physical-device checklist.
 
 ## Sandbox test items still pending
 
-See `Documentation/TestingGuide.md` sandbox checklist.
+See `Documentation/TestingGuide.md` sandbox checklist. Apple Pay sandbox may be unavailable in some regions; live processor validation must still be planned with the approved environment.
+
+## Professionalization and Release Preparation
+
+**Date:** 2026-07-27
+
+### Added
+
+- Public API DocC-oriented comments across public symbols
+- `Documentation/APIReference.md`, `SecurityModel.md`, operational policies
+- `Documentation/REPOSITORY_AUDIT.md`, `RELEASE_READINESS.md`
+- GitHub Actions `.github/workflows/ios-sdk.yml` + `Documentation/CI.md`
+- Governance: PR/issue templates, CODEOWNERS placeholder, CONTRIBUTING, CODE_OF_CONDUCT, release.yml
+- `Scripts/prepare-release.sh`
+- DocC catalog under `Sources/VenPaysApplePay/VenPaysApplePay.docc/`
+
+### Validation commands run
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+swift package resolve
+xcodebuild -scheme VenPaysApplePay -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+xcodebuild -scheme VenPaysApplePay -destination 'platform=iOS Simulator,id=DA2631C0-4058-4EB0-BB57-FA76B0344A33' \
+  -parallel-testing-enabled NO \
+  -resultBundlePath .build/test-results/VenPaysApplePay.xcresult \
+  CODE_SIGNING_ALLOWED=NO test
+```
+
+### Toolchain observed
+
+- Xcode 26.6 (17F113)
+- Apple Swift 6.3.3
+- Simulator: iPad (A16), iOS 26.5, id `DA2631C0-4058-4EB0-BB57-FA76B0344A33`
+
+### Results
+
+- Package resolve: PASS
+- Host `swift build`: FAIL expected (UIKit / iOS-only)
+- Generic iOS build: PASS
+- Simulator tests: PASS — **44 tests / 9 suites**
+- xcresult: `.build/test-results/VenPaysApplePay.xcresult` (gitignored under `.build/`)
+
+### Still blocking RC → production
+
+- Physical Apple Pay device matrix
+- Backend native route deployment evidence
+- Live processor transaction + webhooks
+- Unauthenticated status endpoint remediation confirmation
+- Sensitive log review on device/server
+- Pilot merchant integration
+- Published remote CI green + branch protection / CODEOWNERS replacement
