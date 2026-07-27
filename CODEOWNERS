@@ -1,0 +1,7 @@
+# Placeholder CODEOWNERS — replace before enforcement.
+# Required GitHub team slug example:
+* @<organization>/ios-sdk-maintainers
+
+# Documentation and release governance (optional finer-grained owners once teams exist):
+# /Documentation/ @<organization>/ios-sdk-maintainers
+# /.github/ @<organization>/ios-sdk-maintainers

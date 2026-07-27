@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose an SDK enhancement
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: dropdown
+    id: api_impact
+    attributes:
+      label: Likely public API impact
+      options:
+        - None
+        - Additive
+        - Breaking
+    validations:
+      required: true

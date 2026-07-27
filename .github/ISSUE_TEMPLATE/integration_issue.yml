@@ -1,0 +1,50 @@
+name: Integration issue
+description: Merchant integration problem with native Apple Pay
+title: "[integration] "
+labels: ["integration"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do **not** include API keys or native session tokens.
+        `track_id` is sensitive operational data — share only if required and preferably partially redacted.
+  - type: textarea
+    id: backend_flow
+    attributes:
+      label: Merchant backend flow
+      description: How initiation is performed and returned to the app.
+    validations:
+      required: true
+  - type: textarea
+    id: session_result
+    attributes:
+      label: Session creation result
+      description: Success/failure of initiation without secrets.
+    validations:
+      required: true
+  - type: input
+    id: availability
+    attributes:
+      label: Apple Pay availability result
+      placeholder: available / supportedButNoConfiguredCard / ...
+    validations:
+      required: true
+  - type: input
+    id: error_code
+    attributes:
+      label: SDK error code
+    validations:
+      required: false
+  - type: input
+    id: request_id
+    attributes:
+      label: Request ID
+    validations:
+      required: false
+  - type: input
+    id: track_id
+    attributes:
+      label: Track ID (redact if possible)
+      description: Sensitive — avoid posting full IDs in public forums when possible.
+    validations:
+      required: false
