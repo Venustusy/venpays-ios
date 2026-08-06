@@ -1,8 +1,9 @@
 # Release Readiness
 
-**Date:** 2026-07-27  
-**SDK version:** 0.1.0  
-**Validated commit:** `79a8b66` (`79a8b6694f8c0bb71ae537afe72a7cbd9c4727ca`)  
+**Date:** 2026-08-06  
+**SDK version:** 0.1.0 (`0.1.0-rc.1` tag target)  
+**Validated commit (CI PASS evidence):** `79a8b66` (`79a8b6694f8c0bb71ae537afe72a7cbd9c4727ca`)  
+**RC tag target:** `v0.1.0-rc.1` (commit recorded by the tag itself)  
 **GitHub Actions run:** [30246765172](https://github.com/Venustusy/venpays-ios/actions/runs/30246765172)  
 **CI Xcode:** 16.4 (Build 16F6) · Apple Swift 6.1.2  
 **CI simulator:** iPhone 16 · UDID `5E1C2676-21D9-4C43-9CDC-8EFAD663A9C4` · runtime `iOS-18-5`  
@@ -20,18 +21,20 @@
 | API documentation | PASS | Public `///` comments + APIReference + DocC | No |
 | integration documentation | PASS | IntegrationGuide / BackendIntegration / README | No |
 | security model | PASS | SecurityModel.md documented; remediation of gateway prerequisite **not** evidenced | Yes (backend prerequisite) |
-| release process | PARTIAL | Checklist, validation template, prepare-release.sh present; no signed tag yet | No (process ready; release not cut) |
+| release process | PARTIAL | Checklist, validation template, prepare-release.sh present; RC tag/prerelease in progress | No (process ready) |
 | backend deployment | NOT RUN | No evidence in this repository that native routes are deployed | Yes |
-| physical-device validation | NOT RUN | Not performed in this pass | Yes |
+| physical-device validation | PARTIAL | Apple Pay token generation confirmed on device for Bahrain config; processor authorization success still pending | Yes |
 | sandbox MPGS payment | NOT RUN | Not performed / Apple Pay sandbox may be unavailable in region | Yes |
 | webhook validation | NOT RUN | Not performed | Yes |
 | status recovery validation (live) | PARTIAL | Unit/networking coverage only; live recovery not run | Yes |
 | sensitive logging validation | PARTIAL | Code/docs assert redaction; device/log review not run | Yes |
 | pilot merchant integration | NOT RUN | Not performed | Yes |
+| global market certification | NOT RUN | Initial Bahrain (BHD / Visa / Mastercard / 3-D Secure) only | Yes |
 
 ### Notes
 
 - Host `swift build` without an iOS destination fails to resolve UIKit (expected for iOS-only package); CI uses generic iOS `xcodebuild` instead.
-- Do not treat PASS automated rows as Apple Pay runtime validation.
+- Do not treat PASS automated rows as full Apple Pay runtime or processor validation.
 - Unauthenticated `POST /merchant/payment-status-by-track-id` remains a documented security prerequisite until ops confirms fix.
 - CI evidence taken from successful push run on `main` for commit `79a8b66` (workflow **iOS SDK**).
+- Native iOS does not use `success_url` / `fail_url`; payment completion returns via PassKit + authorize/status JSON.

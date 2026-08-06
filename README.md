@@ -17,18 +17,20 @@ The SDK never calls merchant initiation with `X-API-KEY`. Amount and currency al
 
 ## Current Status
 
-**IMPLEMENTATION COMPLETE — RELEASE CANDIDATE NOT YET VALIDATED**
+**IMPLEMENTATION COMPLETE — `0.1.0-rc.1` FOR CONTROLLED PILOT VALIDATION**
 
 | Gate | Status |
 |------|--------|
 | Local generic iOS build | Passes (when validated) |
 | Automated unit / networking tests | Passes (when validated) |
-| Physical-device Apple Pay testing | **Still required** |
+| Physical-device Apple Pay token generation | Confirmed for initial Bahrain setup |
+| Successful processor authorization | **Still pending** |
 | VenPays / processor end-to-end testing | **Still required** |
 | Backend native routes deployed | **Must be confirmed operationally** |
+| Global market certification | **Not completed** |
 | Production approval | **Not granted** |
 
-This package is **not** production-approved.
+This package is **not** globally certified for unrestricted production deployment.
 
 ## Requirements
 
@@ -90,12 +92,16 @@ git@github.com:Venustusy/venpays-ios.git
 dependencies: [
     .package(
         url: "https://github.com/Venustusy/venpays-ios.git",
-        from: "0.1.0"
+        exact: "0.1.0-rc.1"
     )
 ]
 ```
 
+In Xcode: **File → Add Package Dependencies…** → paste the VenPays repository URL → **Up to Next Minor Version** (or Exact) → select **0.1.0-rc.1**.
+
 Xcode will prompt for GitHub credentials with access to the private Venustusy repository.
+
+The host merchant app must still configure its own Apple Developer Team, Bundle ID, Apple Pay capability, Merchant ID, and provisioning profile. The SDK package does not change those.
 
 ## Basic Usage
 
@@ -169,11 +175,31 @@ See [Documentation/TestingGuide.md](Documentation/TestingGuide.md) and [Document
 
 CI details: [Documentation/CI.md](Documentation/CI.md).
 
+## Regional availability
+
+VenPaysApplePay is distributed as a reusable iOS SDK.
+
+Apple Pay payment availability depends on:
+
+- Apple Pay availability in the merchant's country or region
+- participating card issuers and networks
+- merchant Apple Developer configuration
+- Apple Pay entitlement and Merchant ID configuration
+- Payment Processing certificate configuration
+- VenPays and acquiring-bank activation
+- processor support for the transaction currency and card network
+
+The current release has been designed and initially tested against
+Bahrain merchant configuration using BHD, Visa, Mastercard, and 3-D Secure.
+Other markets require validation before production use.
+
 ## Versioning
 
-Semantic versioning. Current version: **0.1.0** (Unreleased / pre-RC validation).
+Semantic versioning. Current published candidate: **0.1.0-rc.1** (package version string remains `0.1.0`).
 
-Do not treat `0.1.0` as production. A `1.0.0` bump requires completed device, backend, and security gates.
+Do not treat `0.1.0` / `0.1.0-rc.1` as globally production-approved. A `1.0.0` bump requires completed device, backend, processor, and security gates.
+
+For SPM / Xcode: use this private repository URL, **Up to Next Minor Version**, and select **0.1.0-rc.1**.
 
 ## Support
 

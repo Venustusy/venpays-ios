@@ -2,30 +2,38 @@
 
 All notable changes to VenPaysApplePay are documented in this file.
 
-## [0.1.0] - Unreleased
-
-Initial Swift Package implementation of the VenPays native iOS Apple Pay SDK.
+## [0.1.0-rc.1] - 2026-08-06
 
 ### Added
 
-- Initial Swift Package (`VenPaysApplePay`) for iOS 15+
-- Apple Pay availability checks (device support vs configured card)
-- Native Apple Pay payment sheet via `PKPaymentAuthorizationController`
-- VenPays authorize API integration with Bearer native session tokens
-- Idempotent authorization with transport-retry key reuse
-- Payment status recovery with exponential backoff
-- UIKit `ApplePayButton` wrapper around `PKPaymentButton`
-- SwiftUI `SwiftUIApplePayButton` adapter
-- Stable `VenPaysError` / `VenPaysErrorCode` model
-- Unit and networking tests with `MockURLProtocol`
-- Merchant documentation and example application source
+- Native Apple Pay availability checks
+- UIKit and SwiftUI Apple Pay buttons
+- Native Apple Pay sheet presentation
+- VenPays authorization API integration
+- Idempotent payment submission
+- Payment status recovery
+- Structured error handling
+- Merchant integration documentation
+- Automated build and test pipeline
+
+### Validation status
+
+- Generic iOS build passed
+- Automated tests passed
+- Physical Apple Pay token generation confirmed
+- Successful processor authorization remains pending
+- Initial configuration targets Bahrain
+- Global market validation has not been completed
 
 ### Notes
 
-- Physical-device Apple Pay testing is **pending**
-- Sandbox end-to-end testing is **pending**
-- Default production base URL is `https://merchant.venpays.com` (no separate sandbox environment; Apple Pay sandbox is unavailable in some regions)
+- Native flow is JSON-only; `success_url` / `fail_url` on initiation do not control iOS navigation
+- Default production base URL is `https://merchant.venpays.com`
 - Use `.custom(URL)` only for tests or temporary overrides
-- This release is **not** marked 1.0.0 and is **not** claimed production-ready
+- This release candidate is for controlled merchant integration and pilot validation — not unrestricted production deployment
 
 **Classification:** IMPLEMENTATION COMPLETE — RELEASE CANDIDATE NOT YET VALIDATED
+
+## [0.1.0] - Unreleased
+
+Stable `0.1.0` notes will replace this section when GA is cut from the RC line.
