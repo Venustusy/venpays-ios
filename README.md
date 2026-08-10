@@ -15,23 +15,6 @@ VenPaysApplePay is a Swift Package that presents Apple Pay via PassKit, authoriz
 
 The SDK never calls merchant initiation with `X-API-KEY`. Amount and currency always come from a trusted backend session.
 
-## Current Status
-
-**IMPLEMENTATION COMPLETE — `0.1.0-rc.1` FOR CONTROLLED PILOT VALIDATION**
-
-| Gate | Status |
-|------|--------|
-| Local generic iOS build | Passes (when validated) |
-| Automated unit / networking tests | Passes (when validated) |
-| Physical-device Apple Pay token generation | Confirmed for initial Bahrain setup |
-| Successful processor authorization | **Still pending** |
-| VenPays / processor end-to-end testing | **Still required** |
-| Backend native routes deployed | **Must be confirmed operationally** |
-| Global market certification | **Not completed** |
-| Production approval | **Not granted** |
-
-This package is **not** globally certified for unrestricted production deployment.
-
 ## Requirements
 
 - iOS 15.0+
@@ -203,9 +186,9 @@ For SPM / Xcode: use this private repository URL, **Up to Next Minor Version**, 
 
 ## Support
 
-Internal contact: `support@venpays.com` (Venustusy / VenPays)
+Internal contact: `pg@venpays.com` (Venustusy / VenPays)
 
-Security reports: `security@venpays.com` — see [CONTRIBUTING.md](CONTRIBUTING.md). Do not file secrets in issues.
+Security reports: `pg@venpays.com` — see [CONTRIBUTING.md](CONTRIBUTING.md). Do not file secrets in issues.
 
 ## License
 
