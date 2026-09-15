@@ -32,13 +32,47 @@ Read-only configuration used by networking and recovery.
 - **Returns:** `VenPaysApplePayAvailability`
 - Distinguishes device support vs configured card vs expired session
 
-### `presentApplePay(session:from:)`
+### `presentApplePay(session:from:delegate:)`
 
-- **Parameters:** trusted `session`; `presenter` retained for API consistency (PassKit uses `PKPaymentAuthorizationController`)
+- **Parameters:** trusted `session`; `presenter` retained for API consistency (PassKit uses `PKPaymentAuthorizationController`); optional `delegate` for authorization lifecycle callbacks
 - **Returns:** `VenPaysPaymentResult`
 - **Throws:** `VenPaysError` (availability failures, cancellation, network/backend errors)
 - **Important:** Call only from a direct user action
 - **Warning:** Simulator cannot fully validate Apple Pay authorization
+
+---
+
+## VenPaysApplePayAuthorizationDelegate
+
+```swift
+@MainActor
+public protocol VenPaysApplePayAuthorizationDelegate: AnyObject
+```
+
+**Purpose:** Receives Apple Pay authorization lifecycle events so the integrating app can track and correlate the request with the VenPays transaction.
+
+**Thread:** Main actor. Implementations update UI freely.
+
+### `applePayAuthorizationDidStart(session:)`
+
+Fires after the Apple Pay sheet is presented and visible, before the user authorizes or cancels.
+
+### `applePayAuthorizationRequestWasSent(requestID:session:)`
+
+Fires when the authorize HTTP request is sent to VenPays. The `requestID` is the `X-Request-ID` header value; use it to correlate with VenPays transaction logs and webhook payloads.
+
+**Lifecycle note:** The SDK holds a strong reference to the delegate for the duration of one `presentApplePay` call and releases it when the flow completes.
+
+```swift
+final class MyCoordinator: VenPaysApplePayAuthorizationDelegate {
+    func applePayAuthorizationDidStart(session: VenPaysNativePaymentSession) {
+        analytics.track("applePay.sheetShown", trackID: session.trackID)
+    }
+    func applePayAuthorizationRequestWasSent(requestID: String, session: VenPaysNativePaymentSession) {
+        analytics.track("venpays.authorizeSent", requestID: requestID, trackID: session.trackID)
+    }
+}
+```
 
 ---
 

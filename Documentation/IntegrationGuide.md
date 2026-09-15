@@ -106,6 +106,32 @@ SwiftUIApplePayButton(type: .buy, style: .automatic, isPaymentInProgress: viewMo
 
 Obtain a `UIViewController` presenter from the SwiftUI hierarchy (e.g. via `UIViewController` resolver) when calling `presentApplePay`.
 
+## 6. Track the authorization lifecycle
+
+Pass an `VenPaysApplePayAuthorizationDelegate` to `presentApplePay` to observe the authorization lifecycle and correlate with the VenPays transaction:
+
+```swift
+final class PaymentLifecycleTracker: VenPaysApplePayAuthorizationDelegate {
+    func applePayAuthorizationDidStart(session: VenPaysNativePaymentSession) {
+        analytics.track("applePay.sheetShown", trackID: session.trackID)
+    }
+
+    func applePayAuthorizationRequestWasSent(requestID: String, session: VenPaysNativePaymentSession) {
+        // requestID matches the VenPays X-Request-ID header for this authorize call.
+        analytics.track("venpays.authorizeSent", requestID: requestID, trackID: session.trackID)
+    }
+}
+
+let tracker = PaymentLifecycleTracker()
+let result = try await client.presentApplePay(
+    session: session,
+    from: self,
+    delegate: tracker
+)
+```
+
+The delegate is retained for the duration of the call and released when the flow completes.
+
 ## Handling results
 
 | Status | Meaning |

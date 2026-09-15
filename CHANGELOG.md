@@ -2,6 +2,14 @@
 
 All notable changes to VenPaysApplePay are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Authorization lifecycle delegate (`VenPaysApplePayAuthorizationDelegate`) exposing:
+  - `applePayAuthorizationDidStart(session:)` when the Apple Pay sheet appears
+  - `applePayAuthorizationRequestWasSent(requestID:session:)` when the authorize request is dispatched, including the `X-Request-ID` for transaction correlation
+
 ## [0.1.0-rc.1] - 2026-08-06
 
 ### Added

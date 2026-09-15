@@ -14,6 +14,7 @@ final class ExamplePaymentViewModel: ObservableObject {
 
     private let merchantBackend = ExampleMerchantBackendClient()
     private let client: VenPaysApplePayClient
+    private let lifecycleTracker = ExampleLifecycleTracker()
 
     init() {
         let configuration = try! VenPaysConfiguration(
@@ -53,7 +54,11 @@ final class ExamplePaymentViewModel: ObservableObject {
         defer { isPaying = false }
 
         do {
-            let result = try await client.presentApplePay(session: session, from: presenter)
+            let result = try await client.presentApplePay(
+                session: session,
+                from: presenter,
+                delegate: lifecycleTracker
+            )
             apply(result: result)
         } catch let error as VenPaysError where error.code == .paymentCancelled {
             statusMessage = "Payment cancelled."
@@ -85,5 +90,17 @@ final class ExamplePaymentViewModel: ObservableObject {
             statusMessage = "Unknown status after recovery. Reconcile trackID=\(result.trackID)"
             statusColor = .purple
         }
+    }
+}
+
+/// Example lifecycle observer that logs authorization events.
+@MainActor
+private final class ExampleLifecycleTracker: VenPaysApplePayAuthorizationDelegate {
+    func applePayAuthorizationDidStart(session: VenPaysNativePaymentSession) {
+        print("Apple Pay authorization started for trackID=\(session.trackID)")
+    }
+
+    func applePayAuthorizationRequestWasSent(requestID: String, session: VenPaysNativePaymentSession) {
+        print("Authorization request sent requestID=\(requestID) trackID=\(session.trackID)")
     }
 }
