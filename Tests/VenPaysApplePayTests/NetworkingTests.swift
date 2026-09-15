@@ -18,7 +18,7 @@ struct NetworkingTests {
                 #expect(request.httpMethod == "POST")
                 #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer \(Fixtures.token)")
                 #expect(request.value(forHTTPHeaderField: "Idempotency-Key") == "idem-1")
-                #expect(request.value(forHTTPHeaderField: "X-Request-ID") != nil)
+                #expect(request.value(forHTTPHeaderField: "X-Request-ID") == "req-auth-1")
                 #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
                 #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
                 #expect(request.value(forHTTPHeaderField: "User-Agent") == "VenPaysApplePay-iOS/0.1.0")
@@ -40,7 +40,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: session,
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-1"
+                idempotencyKey: "idem-1",
+                requestID: "req-auth-1"
             )
             #expect(outcome.result.status == .succeeded)
             #expect(outcome.httpStatus == 200)
@@ -56,7 +57,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: Fixtures.validSession(),
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-2"
+                idempotencyKey: "idem-2",
+                requestID: "req-auth-2"
             )
             #expect(outcome.httpStatus == 202)
             #expect(outcome.result.status == .processing)
@@ -73,7 +75,8 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-3"
+                    idempotencyKey: "idem-3",
+                    requestID: "req-auth-3"
                 )
                 Issue.record("Expected error")
             } catch let error as VenPaysError {
@@ -93,7 +96,8 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-4"
+                    idempotencyKey: "idem-4",
+                    requestID: "req-auth-4"
                 )
                 Issue.record("Expected error")
             } catch let error as VenPaysError {
@@ -112,7 +116,8 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-5"
+                    idempotencyKey: "idem-5",
+                    requestID: "req-auth-5"
                 )
                 Issue.record("Expected timeout")
             } catch let error as VenPaysError {
@@ -137,7 +142,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: Fixtures.validSession(),
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-reuse"
+                idempotencyKey: "idem-reuse",
+                requestID: "req-auth-reuse"
             )
             #expect(outcome.result.status == .succeeded)
             #expect(callCount == 2)
