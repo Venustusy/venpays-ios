@@ -78,13 +78,16 @@ public final class VenPaysApplePayClient {
     ///   - session: Trusted session. Amount and currency are taken only from this value.
     ///   - presenter: Presenting view controller retained for API consistency; presentation uses
     ///     `PKPaymentAuthorizationController`.
+    ///   - delegate: Optional lifecycle observer. The SDK holds a strong reference to the delegate
+    ///     for the duration of this call and releases it when the authorization flow completes.
     /// - Returns: Final or best-effort payment result, including `.unknown` when recovery exhausts.
     /// - Throws: ``VenPaysError`` for availability, presentation, token, network, or backend failures.
     /// - Important: Invoke only as a direct result of a user action (for example an Apple Pay button tap).
     /// - Note: Authorize uses a single idempotency key per logical attempt; transport retries reuse it.
     public func presentApplePay(
         session: VenPaysNativePaymentSession,
-        from presenter: UIViewController
+        from presenter: UIViewController,
+        delegate: (any VenPaysApplePayAuthorizationDelegate)? = nil
     ) async throws -> VenPaysPaymentResult {
         switch applePayAvailability(for: session) {
         case .available:
@@ -105,7 +108,8 @@ public final class VenPaysApplePayClient {
         let coordinator = ApplePayCoordinator(
             authorizer: authorizer,
             recoverer: recoverer,
-            logger: logger
+            logger: logger,
+            delegate: delegate
         )
         return try await coordinator.present(session: session, from: presenter)
     }

@@ -9,6 +9,7 @@ final class ApplePayCoordinator: NSObject {
     private let authorizer: any ApplePayPaymentAuthorizing
     private let recoverer: any PaymentStatusRecovering
     private let logger: Logger
+    private weak var delegate: VenPaysApplePayAuthorizationDelegate?
 
     private var session: VenPaysNativePaymentSession?
     private var continuation: CheckedContinuation<VenPaysPaymentResult, Error>?
@@ -27,11 +28,13 @@ final class ApplePayCoordinator: NSObject {
     init(
         authorizer: any ApplePayPaymentAuthorizing,
         recoverer: any PaymentStatusRecovering,
-        logger: Logger
+        logger: Logger,
+        delegate: VenPaysApplePayAuthorizationDelegate? = nil
     ) {
         self.authorizer = authorizer
         self.recoverer = recoverer
         self.logger = logger
+        self.delegate = delegate
     }
 
     func present(
@@ -73,6 +76,8 @@ final class ApplePayCoordinator: NSObject {
                                 )
                             )
                         )
+                    } else {
+                        self.delegate?.applePayAuthorizationDidStart(session: session)
                     }
                 }
             }
@@ -86,6 +91,7 @@ final class ApplePayCoordinator: NSObject {
         controller = nil
         session = nil
         presenter = nil
+        delegate = nil
 
         let cont = continuation
         continuation = nil
@@ -215,10 +221,13 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
         }
 
         do {
+            let requestID = RequestID.generate()
+            delegate?.applePayAuthorizationRequestWasSent(requestID: requestID, session: session)
             let outcome = try await authorizer.authorize(
                 session: session,
                 token: token,
-                idempotencyKey: idempotencyKey
+                idempotencyKey: idempotencyKey,
+                requestID: requestID
             )
             pendingResult = outcome.result
 

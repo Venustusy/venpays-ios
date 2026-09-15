@@ -30,10 +30,10 @@ final class APIClient: Sendable {
     func authorize(
         session paymentSession: VenPaysNativePaymentSession,
         token: EncodedApplePayToken,
-        idempotencyKey: String
+        idempotencyKey: String,
+        requestID: String
     ) async throws -> AuthorizePaymentOutcome {
         let body = try AuthorizePaymentRequest(token: token).jsonData()
-        let requestID = RequestID.generate()
         let apiRequest = APIRequest(
             endpoint: .authorize(trackID: paymentSession.trackID),
             bearerToken: paymentSession.nativeSessionToken,
