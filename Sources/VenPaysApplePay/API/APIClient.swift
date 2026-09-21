@@ -106,9 +106,10 @@ final class APIClient: Sendable {
                 throw mapped
             } catch is CancellationError {
                 throw VenPaysError(
-                    code: .paymentCancelled,
+                    code: .networkRequestCancelled,
                     message: "The network request was cancelled.",
-                    requestID: apiRequest.requestID
+                    requestID: apiRequest.requestID,
+                    isRetryable: true
                 )
             } catch {
                 throw VenPaysError(
@@ -220,9 +221,10 @@ final class APIClient: Sendable {
             )
         case .cancelled:
             return VenPaysError(
-                code: .paymentCancelled,
+                code: .networkRequestCancelled,
                 message: "The network request was cancelled.",
                 requestID: requestID,
+                isRetryable: true,
                 underlyingDescription: "URLError.cancelled"
             )
         case .secureConnectionFailed, .serverCertificateUntrusted, .clientCertificateRejected:

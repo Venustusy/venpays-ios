@@ -71,8 +71,11 @@ public final class VenPaysApplePayClient {
 
     /// Presents the Apple Pay sheet and authorizes the payment with VenPays.
     ///
-    /// On success or accepted processing, returns a ``VenPaysPaymentResult``. User cancellation
-    /// throws ``VenPaysError`` with ``VenPaysErrorCode/paymentCancelled``.
+    /// On success or accepted processing, returns a ``VenPaysPaymentResult``. Closing the sheet
+    /// before any authorization throws ``VenPaysError`` with
+    /// ``VenPaysErrorCode/userCancelledBeforeAuthorization``; an in-flight request cancelled after
+    /// authorization may have reached VenPay throws ``VenPaysErrorCode/networkRequestCancelled``
+    /// when its outcome cannot be confirmed.
     ///
     /// - Parameters:
     ///   - session: Trusted session. Amount and currency are taken only from this value.

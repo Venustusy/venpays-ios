@@ -152,8 +152,8 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
             finish(
                 with: .failure(
                     VenPaysError(
-                        code: .paymentCancelled,
-                        message: "The user cancelled the Apple Pay sheet."
+                        code: .userCancelledBeforeAuthorization,
+                        message: "The user closed Apple Pay before any authorization was dispatched."
                     )
                 )
             )
@@ -274,6 +274,15 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
         session: VenPaysNativePaymentSession,
         completion: @escaping (PKPaymentAuthorizationResult) -> Void
     ) async {
+        if error.code == .networkRequestCancelled {
+            await handleNetworkCancellation(
+                error: error,
+                session: session,
+                completion: completion
+            )
+            return
+        }
+
         let uncertainCodes: Set<VenPaysErrorCode> = [
             .requestTimeout,
             .networkUnavailable,
@@ -315,7 +324,7 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
             return
         }
 
-        if error.code == .paymentCancelled {
+        if error.code == .userCancelledBeforeAuthorization {
             callCompletion(completion, status: .failure)
             pendingError = error
             return
@@ -323,6 +332,50 @@ extension ApplePayCoordinator: PKPaymentAuthorizationControllerDelegate {
 
         callCompletion(completion, status: .failure)
         pendingError = error
+    }
+
+    /// Reconciles an in-flight authorize request that was cancelled before its
+    /// response arrived. The request may never have left the device, or it may
+    /// have been captured by the processor, so the outcome is polled before any
+    /// classification. When the outcome cannot be confirmed, the unresolved
+    /// ``VenPaysErrorCode/networkRequestCancelled`` error is surfaced so the
+    /// merchant can reconcile using the track ID instead of treating it as a
+    /// definitive user cancellation.
+    private func handleNetworkCancellation(
+        error: VenPaysError,
+        session: VenPaysNativePaymentSession,
+        completion: @escaping (PKPaymentAuthorizationResult) -> Void
+    ) async {
+        do {
+            let recovered = try await recoverer.recover(session: session, seed: nil)
+            pendingResult = recovered
+            switch recovered.status {
+            case .succeeded:
+                callCompletion(completion, status: .success)
+            case .processing:
+                callCompletion(completion, status: .success)
+                needsPostSheetRecovery = true
+            case .failed, .cancelled:
+                callCompletion(completion, status: .failure)
+            case .unknown:
+                callCompletion(completion, status: .success)
+                needsPostSheetRecovery = true
+                pendingError = VenPaysError(
+                    code: .networkRequestCancelled,
+                    message: "The authorization request was cancelled and its outcome could not be confirmed. The authorization may have reached VenPay; reconcile using the track ID.",
+                    requestID: error.requestID
+                )
+            }
+        } catch let recoveryError {
+            callCompletion(completion, status: .success)
+            needsPostSheetRecovery = true
+            let recoveryRequestID = (recoveryError as? VenPaysError)?.requestID ?? error.requestID
+            pendingError = VenPaysError(
+                code: .networkRequestCancelled,
+                message: "The authorization request was cancelled and its outcome could not be confirmed. The authorization may have reached VenPay; reconcile using the track ID.",
+                requestID: recoveryRequestID
+            )
+        }
     }
 
     private func callCompletion(

@@ -60,12 +60,18 @@ final class ExamplePaymentViewModel: ObservableObject {
                 delegate: lifecycleTracker
             )
             apply(result: result)
-        } catch let error as VenPaysError where error.code == .paymentCancelled {
-            statusMessage = "Payment cancelled."
-            statusColor = .orange
         } catch let error as VenPaysError {
-            statusMessage = "Error (\(error.code.rawValue)): \(error.message)"
-            statusColor = .red
+            switch error.code {
+            case .userCancelledBeforeAuthorization:
+                statusMessage = "You closed Apple Pay before authorization — no charge."
+                statusColor = .orange
+            case .networkRequestCancelled:
+                statusMessage = "The request was cancelled; the authorization may have reached VenPay. Reconcile trackID \(session.trackID)."
+                statusColor = .orange
+            default:
+                statusMessage = "Error (\(error.code.rawValue)): \(error.message)"
+                statusColor = .red
+            }
         } catch {
             statusMessage = "Unexpected error: \(error.localizedDescription)"
             statusColor = .red

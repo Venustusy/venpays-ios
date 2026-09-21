@@ -23,7 +23,20 @@ public enum VenPaysErrorCode: String, Sendable, Codable, Equatable {
     case invalidApplePayConfiguration
     /// Apple Pay sheet failed to present.
     case presentationFailed
+    /// User closed the Apple Pay sheet before any authorization was dispatched.
+    ///
+    /// No authorize request was sent, so no charge is possible. Safe to retry immediately.
+    case userCancelledBeforeAuthorization
+    /// An in-flight authorize/status network operation was cancelled.
+    ///
+    /// The authorization may have reached VenPay. Do not treat as a definitive user
+    /// cancellation; reconcile with the merchant backend using `trackID`.
+    case networkRequestCancelled
     /// User cancelled the Apple Pay sheet or the request was cancelled.
+    ///
+    /// - Deprecated: Ambiguous predecessor of ``userCancelledBeforeAuthorization`` and
+    ///   ``networkRequestCancelled``. New SDK versions emit the specific codes instead.
+    @available(*, deprecated, renamed: "userCancelledBeforeAuthorization")
     case paymentCancelled
     /// Apple Pay token / paymentData is invalid.
     case invalidApplePayToken
