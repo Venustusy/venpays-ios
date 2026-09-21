@@ -126,10 +126,19 @@ func pay(from viewController: UIViewController, initiationData: Data) async {
             // Reconcile with merchant backend using trackID
             break
         }
-    } catch let error as VenPaysError where error.code == .paymentCancelled {
-        // User dismissed the Apple Pay sheet
-    } catch {
-        // Handle VenPaysError.code
+    } catch let error as VenPaysError {
+        switch error.code {
+        case .userCancelledBeforeAuthorization:
+            // User dismissed the Apple Pay sheet before any authorization — no charge.
+            break
+        case .networkRequestCancelled:
+            // An in-flight request was cancelled; authorization may have reached VenPay.
+            // Reconcile with your merchant backend before allowing a retry.
+            break
+        default:
+            // Handle other VenPaysError codes.
+            break
+        }
     }
 }
 ```

@@ -52,8 +52,9 @@ Status: **not performed in this repository implementation pass**.
 
 ## Suggested manual scenarios
 
-1. **Cancellation** — open sheet, tap Cancel → `paymentCancelled`
-2. **Decline** — use a sandbox decline card → `failed` / `processorDeclined`
-3. **Duplicate tap** — tap Apple Pay button twice quickly → second tap ignored while in progress
-4. **Backgrounding** — background during sheet; confirm no crash / single completion
-5. **Network loss after authorize** — disable network after token sent; confirm recovery / `unknown` rather than false failure when uncertain
+1. **Cancellation before authorization** — open sheet, tap Cancel → `userCancelledBeforeAuthorization`
+2. **Cancellation after authorize** — cancel in-flight authorized request (e.g. force-close while request in flight) → recovery attempted; if unresolved, `networkRequestCancelled`
+3. **Decline** — use a sandbox decline card → `failed` / `processorDeclined`
+4. **Duplicate tap** — tap Apple Pay button twice quickly → second tap ignored while in progress
+5. **Backgrounding** — background during sheet; confirm no crash / single completion
+6. **Network loss after authorize** — disable network after token sent; confirm recovery / `unknown` rather than false failure when uncertain

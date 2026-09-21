@@ -87,10 +87,18 @@ button.onTap = { [weak self] in
                 from: self
             )
             self.handle(result)
-        } catch let error as VenPaysError where error.code == .paymentCancelled {
-            // User dismissed the sheet
-        } catch {
-            // Show failure
+        } catch let error as VenPaysError {
+            switch error.code {
+            case .userCancelledBeforeAuthorization:
+                // User dismissed the sheet before any authorization — no charge.
+                break
+            case .networkRequestCancelled:
+                // In-flight request cancelled; authorization may have reached VenPay.
+                // Reconcile with your merchant backend before allowing a retry.
+                break
+            default:
+                break
+            }
         }
     }
 }
@@ -146,7 +154,12 @@ The Apple Pay sheet UI and Cancel button are controlled by Apple. The SDK does n
 
 ## Cancellation
 
-User cancellation before authorization throws `VenPaysError` with code `paymentCancelled`.
+The SDK separates the two situations that older versions conflated as `paymentCancelled`:
+
+- `userCancelledBeforeAuthorization` — the user closed the Apple Pay sheet before any authorize request
+  was dispatched. No charge is possible; retry immediately if desired.
+- `networkRequestCancelled` — an in-flight authorize/status request was cancelled. The authorization
+  may have reached VenPay, so reconcile with your merchant backend using `trackID` before retrying.
 
 ## Security notes
 
