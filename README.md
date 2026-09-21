@@ -126,13 +126,54 @@ func pay(from viewController: UIViewController, initiationData: Data) async {
             // Reconcile with merchant backend using trackID
             break
         }
-    } catch let error as VenPaysError where error.code == .paymentCancelled {
-        // User dismissed the Apple Pay sheet
-    } catch {
-        // Handle VenPaysError.code
+    } catch let error as VenPaysError {
+        switch error.code {
+        case .userCancelledBeforeAuthorization:
+            // User dismissed the Apple Pay sheet before any authorization — no charge.
+            break
+        case .networkRequestCancelled:
+            // An in-flight request was cancelled; authorization may have reached VenPay.
+            // Reconcile with your merchant backend before allowing a retry.
+            break
+        default:
+            // Handle other VenPaysError codes.
+            break
+        }
     }
 }
 ```
+
+### Tracking the authorization lifecycle
+
+Pass an `VenPaysApplePayAuthorizationDelegate` to observe when the Apple Pay sheet appears and when the authorize request is dispatched to VenPays:
+
+```swift
+import VenPaysApplePay
+
+@MainActor
+final class PaymentTracker: VenPaysApplePayAuthorizationDelegate {
+    func applePayAuthorizationDidStart(session: VenPaysNativePaymentSession) {
+        // Apple Pay sheet is visible for this trackID.
+    }
+
+    func applePayAuthorizationRequestWasSent(
+        requestID: String,
+        session: VenPaysNativePaymentSession
+    ) {
+        // requestID is the X-Request-ID sent with the authorize request.
+        // Use it to correlate with VenPays transaction logs and webhooks.
+    }
+}
+
+// Pass the delegate when presenting Apple Pay:
+let result = try await client.presentApplePay(
+    session: session,
+    from: viewController,
+    delegate: tracker
+)
+```
+
+The delegate is called on the main actor and released when the authorization flow completes.
 
 ## Merchant Backend Requirement
 

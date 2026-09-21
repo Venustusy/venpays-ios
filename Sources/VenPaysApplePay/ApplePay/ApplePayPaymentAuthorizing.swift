@@ -5,7 +5,8 @@ protocol ApplePayPaymentAuthorizing: Sendable {
     func authorize(
         session: VenPaysNativePaymentSession,
         token: EncodedApplePayToken,
-        idempotencyKey: String
+        idempotencyKey: String,
+        requestID: String
     ) async throws -> AuthorizePaymentOutcome
 }
 

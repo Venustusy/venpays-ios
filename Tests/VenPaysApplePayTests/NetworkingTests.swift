@@ -18,10 +18,10 @@ struct NetworkingTests {
                 #expect(request.httpMethod == "POST")
                 #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer \(Fixtures.token)")
                 #expect(request.value(forHTTPHeaderField: "Idempotency-Key") == "idem-1")
-                #expect(request.value(forHTTPHeaderField: "X-Request-ID") != nil)
+                #expect(request.value(forHTTPHeaderField: "X-Request-ID") == "req-auth-1")
                 #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
                 #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
-                #expect(request.value(forHTTPHeaderField: "User-Agent") == "VenPaysApplePay-iOS/0.1.0")
+                #expect(request.value(forHTTPHeaderField: "User-Agent") == "VenPaysApplePay-iOS/0.1.1")
                 #expect(request.url?.path.contains("/v1/sdk/apple-pay/payments/\(Fixtures.trackID)/authorize") == true)
 
                 guard let bodyData = request.httpBody ?? request.venpays_httpBodyFromStream() else {
@@ -40,7 +40,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: session,
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-1"
+                idempotencyKey: "idem-1",
+                requestID: "req-auth-1"
             )
             #expect(outcome.result.status == .succeeded)
             #expect(outcome.httpStatus == 200)
@@ -56,7 +57,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: Fixtures.validSession(),
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-2"
+                idempotencyKey: "idem-2",
+                requestID: "req-auth-2"
             )
             #expect(outcome.httpStatus == 202)
             #expect(outcome.result.status == .processing)
@@ -73,7 +75,8 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-3"
+                    idempotencyKey: "idem-3",
+                    requestID: "req-auth-3"
                 )
                 Issue.record("Expected error")
             } catch let error as VenPaysError {
@@ -93,7 +96,8 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-4"
+                    idempotencyKey: "idem-4",
+                    requestID: "req-auth-4"
                 )
                 Issue.record("Expected error")
             } catch let error as VenPaysError {
@@ -112,13 +116,73 @@ struct NetworkingTests {
                 _ = try await client.authorize(
                     session: Fixtures.validSession(),
                     token: Fixtures.encodedToken(),
-                    idempotencyKey: "idem-5"
+                    idempotencyKey: "idem-5",
+                    requestID: "req-auth-5"
                 )
                 Issue.record("Expected timeout")
             } catch let error as VenPaysError {
                 #expect(error.code == .requestTimeout)
                 #expect(error.isRetryable == true)
             }
+        }
+
+        @Test func authorizeURLCancelMapsToNetworkRequestCancelled() async throws {
+            MockURLProtocol.reset()
+            MockURLProtocol.requestHandler = { _ in
+                .init(error: URLError(.cancelled))
+            }
+            let client = try makeClient(maxTransportRetries: 0)
+            do {
+                _ = try await client.authorize(
+                    session: Fixtures.validSession(),
+                    token: Fixtures.encodedToken(),
+                    idempotencyKey: "idem-cancel-url",
+                    requestID: "req-cancel-url"
+                )
+                Issue.record("Expected networkRequestCancelled")
+            } catch let error as VenPaysError {
+                #expect(error.code == .networkRequestCancelled)
+                #expect(error.isRetryable == true)
+                #expect(error.requestID == "req-cancel-url")
+            }
+        }
+
+        @Test func statusFetchURLCancelMapsToNetworkRequestCancelled() async throws {
+            MockURLProtocol.reset()
+            MockURLProtocol.requestHandler = { _ in
+                .init(error: URLError(.cancelled))
+            }
+            let client = try makeClient(maxTransportRetries: 0)
+            do {
+                _ = try await client.fetchStatus(session: Fixtures.validSession())
+                Issue.record("Expected networkRequestCancelled")
+            } catch let error as VenPaysError {
+                #expect(error.code == .networkRequestCancelled)
+                #expect(error.isRetryable == true)
+            }
+        }
+
+        @Test func transportRetryReusesIdempotencyKeyOnURLCancel() async throws {
+            MockURLProtocol.reset()
+            var callCount = 0
+            MockURLProtocol.requestHandler = { request in
+                callCount += 1
+                #expect(request.value(forHTTPHeaderField: "Idempotency-Key") == "idem-cancel-retry")
+                if callCount == 1 {
+                    return .init(error: URLError(.cancelled))
+                }
+                return .init(statusCode: 200, body: Fixtures.authorizeSuccessBody())
+            }
+
+            let client = try makeClient(maxTransportRetries: 1)
+            let outcome = try await client.authorize(
+                session: Fixtures.validSession(),
+                token: Fixtures.encodedToken(),
+                idempotencyKey: "idem-cancel-retry",
+                requestID: "req-cancel-retry"
+            )
+            #expect(outcome.result.status == .succeeded)
+            #expect(callCount == 2)
         }
 
         @Test func transportRetryReusesIdempotencyKey() async throws {
@@ -137,7 +201,8 @@ struct NetworkingTests {
             let outcome = try await client.authorize(
                 session: Fixtures.validSession(),
                 token: Fixtures.encodedToken(),
-                idempotencyKey: "idem-reuse"
+                idempotencyKey: "idem-reuse",
+                requestID: "req-auth-reuse"
             )
             #expect(outcome.result.status == .succeeded)
             #expect(callCount == 2)
@@ -303,6 +368,39 @@ struct NetworkingTests {
             let result = try await makeService().recover(session: Fixtures.validSession(), seed: seed)
             #expect(result.status == .succeeded)
             #expect(MockURLProtocol.requests.isEmpty)
+        }
+
+        @Test func networkCancelDuringRecoveryRetriesThenSucceeds() async throws {
+            MockURLProtocol.reset()
+            var calls = 0
+            MockURLProtocol.requestHandler = { _ in
+                calls += 1
+                if calls == 1 {
+                    return .init(error: URLError(.cancelled))
+                }
+                return .init(statusCode: 200, body: Fixtures.statusBody(status: "succeeded"))
+            }
+
+            let result = try await makeService(maxAttempts: 3, initialDelay: 0).recover(
+                session: Fixtures.validSession(),
+                seed: nil
+            )
+            #expect(result.status == .succeeded)
+            #expect(calls == 2)
+        }
+
+        @Test func networkCancelDuringRecoveryExhaustsToUnknown() async throws {
+            MockURLProtocol.reset()
+            MockURLProtocol.requestHandler = { _ in
+                .init(error: URLError(.cancelled))
+            }
+
+            let result = try await makeService(maxAttempts: 2, initialDelay: 0).recover(
+                session: Fixtures.validSession(),
+                seed: nil
+            )
+            #expect(result.status == .unknown)
+            #expect(MockURLProtocol.requests.count == 2)
         }
 
         private func makeService(

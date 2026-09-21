@@ -43,8 +43,8 @@ struct ConfigurationTests {
         }
     }
 
-    @Test func sdkVersionIs010() {
-        #expect(SDKVersion.current == "0.1.0")
-        #expect(SDKVersion.userAgent == "VenPaysApplePay-iOS/0.1.0")
+    @Test func sdkVersionIs011() {
+        #expect(SDKVersion.current == "0.1.1")
+        #expect(SDKVersion.userAgent == "VenPaysApplePay-iOS/0.1.1")
     }
 }

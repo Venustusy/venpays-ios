@@ -49,6 +49,6 @@ struct ApplePayTokenEncoderTests {
         #expect(json?["transaction_identifier"] as? String == "apple-txn")
         let sdk = json?["sdk"] as? [String: Any]
         #expect(sdk?["platform"] as? String == "ios")
-        #expect(sdk?["version"] as? String == "0.1.0")
+        #expect(sdk?["version"] as? String == "0.1.1")
     }
 }

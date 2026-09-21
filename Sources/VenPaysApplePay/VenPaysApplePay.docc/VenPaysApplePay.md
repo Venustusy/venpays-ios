@@ -33,6 +33,10 @@ VenPaysApplePay presents Apple Pay with PassKit, authorizes payment tokens again
 - ``VenPaysError``
 - ``VenPaysErrorCode``
 
+### Authorization lifecycle
+
+- ``VenPaysApplePayAuthorizationDelegate``
+
 ### UI
 
 - ``ApplePayButton``

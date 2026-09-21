@@ -100,7 +100,7 @@ enum BackendErrorMapper {
 
     static func isRetryable(code: VenPaysErrorCode, httpStatus: Int?) -> Bool {
         switch code {
-        case .requestTimeout, .networkUnavailable, .processorUnavailable, .rateLimited, .internalError:
+        case .requestTimeout, .networkUnavailable, .processorUnavailable, .rateLimited, .internalError, .networkRequestCancelled:
             return true
         case .paymentAlreadyProcessing:
             return true
@@ -132,6 +132,10 @@ enum BackendErrorMapper {
             return "Apple Pay configuration is invalid."
         case .presentationFailed:
             return "The Apple Pay sheet failed to present."
+        case .userCancelledBeforeAuthorization:
+            return "The user cancelled before the payment was authorized."
+        case .networkRequestCancelled:
+            return "The network request was cancelled. The authorization may have reached VenPay."
         case .paymentCancelled:
             return "The payment was cancelled."
         case .invalidApplePayToken:

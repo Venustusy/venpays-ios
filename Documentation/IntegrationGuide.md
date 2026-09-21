@@ -87,10 +87,18 @@ button.onTap = { [weak self] in
                 from: self
             )
             self.handle(result)
-        } catch let error as VenPaysError where error.code == .paymentCancelled {
-            // User dismissed the sheet
-        } catch {
-            // Show failure
+        } catch let error as VenPaysError {
+            switch error.code {
+            case .userCancelledBeforeAuthorization:
+                // User dismissed the sheet before any authorization — no charge.
+                break
+            case .networkRequestCancelled:
+                // In-flight request cancelled; authorization may have reached VenPay.
+                // Reconcile with your merchant backend before allowing a retry.
+                break
+            default:
+                break
+            }
         }
     }
 }
@@ -106,6 +114,32 @@ SwiftUIApplePayButton(type: .buy, style: .automatic, isPaymentInProgress: viewMo
 
 Obtain a `UIViewController` presenter from the SwiftUI hierarchy (e.g. via `UIViewController` resolver) when calling `presentApplePay`.
 
+## 6. Track the authorization lifecycle
+
+Pass an `VenPaysApplePayAuthorizationDelegate` to `presentApplePay` to observe the authorization lifecycle and correlate with the VenPays transaction:
+
+```swift
+final class PaymentLifecycleTracker: VenPaysApplePayAuthorizationDelegate {
+    func applePayAuthorizationDidStart(session: VenPaysNativePaymentSession) {
+        analytics.track("applePay.sheetShown", trackID: session.trackID)
+    }
+
+    func applePayAuthorizationRequestWasSent(requestID: String, session: VenPaysNativePaymentSession) {
+        // requestID matches the VenPays X-Request-ID header for this authorize call.
+        analytics.track("venpays.authorizeSent", requestID: requestID, trackID: session.trackID)
+    }
+}
+
+let tracker = PaymentLifecycleTracker()
+let result = try await client.presentApplePay(
+    session: session,
+    from: self,
+    delegate: tracker
+)
+```
+
+The delegate is retained for the duration of the call and released when the flow completes.
+
 ## Handling results
 
 | Status | Meaning |
@@ -120,7 +154,12 @@ The Apple Pay sheet UI and Cancel button are controlled by Apple. The SDK does n
 
 ## Cancellation
 
-User cancellation before authorization throws `VenPaysError` with code `paymentCancelled`.
+The SDK separates the two situations that older versions conflated as `paymentCancelled`:
+
+- `userCancelledBeforeAuthorization` — the user closed the Apple Pay sheet before any authorize request
+  was dispatched. No charge is possible; retry immediately if desired.
+- `networkRequestCancelled` — an in-flight authorize/status request was cancelled. The authorization
+  may have reached VenPay, so reconcile with your merchant backend using `trackID` before retrying.
 
 ## Security notes
 

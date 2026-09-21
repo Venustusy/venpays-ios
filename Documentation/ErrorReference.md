@@ -13,7 +13,9 @@ Merchants should switch on `VenPaysError.code`, not parse message text.
 | `noSupportedCard` | No card for networks | User action |
 | `invalidApplePayConfiguration` | Merchant ID / networks / capabilities | No |
 | `presentationFailed` | Sheet failed to present | Maybe |
-| `paymentCancelled` | User cancelled | No |
+| `userCancelledBeforeAuthorization` | User closed the sheet before any authorization — no charge possible | Immediately |
+| `networkRequestCancelled` | In-flight request cancelled; authorization may have reached VenPay | No — reconcile by track ID first |
+| ~~`paymentCancelled`~~ | Deprecated — replaced by the two codes above | No |
 | `invalidApplePayToken` | Token / paymentData invalid | No |
 | `invalidBackendResponse` | Malformed backend payload | Maybe |
 | `unauthorized` | Bad / invalid native session | Re-initiate |
