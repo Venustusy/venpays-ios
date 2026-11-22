@@ -38,3 +38,22 @@
 - Unauthenticated `POST /merchant/payment-status-by-track-id` remains a documented security prerequisite until ops confirms fix.
 - CI evidence taken from successful push run on `main` for commit `79a8b66` (workflow **iOS SDK**).
 - Native iOS does not use `success_url` / `fail_url`; payment completion returns via PassKit + authorize/status JSON.
+
+## Native Apple Pay gate status (VP-188, 22 Nov 2026)
+
+The payment engine's code default and `.env.example` now set `NATIVE_APPLE_PAY_ENABLED=false`.
+Each environment sets the flag explicitly in CDK so it is never implicit:
+
+| Environment | Flag | Reason |
+|-------------|------|--------|
+| Production (Live) | `true` (explicit CDK override) | Live merchants still use native Apple Pay; switching off would stop them. Time-bound risk acceptance, not SDK approval. |
+| Sandbox | `false` (explicit CDK override) | Native Apple Pay is unavailable for testing until the release gates below pass. |
+
+This does **not** make the native SDK production-approved. Every row marked `Yes` in the
+"Blocking?" column above is still open — notably processor authorization on a physical
+device, sandbox MPGS payment, webhook validation, live status recovery, sensitive-logging
+validation, pilot merchant integration and global market certification. The Live override
+may be removed, and the backend default kept off in production, only once all blocking
+rows are `PASS`.
+
+Hosted (web) Apple Pay is unaffected by this flag.
